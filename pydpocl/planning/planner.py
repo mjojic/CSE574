@@ -8,7 +8,14 @@ from dataclasses import dataclass
 from typing import Any
 
 from pydpocl.core.interfaces import BasePlanner, PlanningProblem
-from pydpocl.core.plan import Plan
+from pydpocl.core.plan import Plan, create_initial_plan
+from pydpocl.planning.heuristic import create_heuristic
+from pydpocl.planning.pocl_expansion import (
+    expand_open_condition,
+    find_unresolved_threats,
+    resolve_threat,
+)
+from pydpocl.planning.search import create_search_strategy
 
 
 @dataclass
@@ -24,10 +31,13 @@ class PlanningStatistics:
 
 
 class DPOCLPlanner(BasePlanner[Plan, Plan]):
-    """Main DPOCL planner implementation.
+    """POCL planner with systematic frontier-based search.
 
-    This is a modern, clean implementation of the DPOCL algorithm
-    using immutable data structures and pluggable strategies.
+    Each node in the search space is an immutable partial plan.  At each
+    iteration the planner pops the best plan, checks for unresolved threats
+    (resolved by promotion/demotion branching), then resolves one open
+    condition (by reusing an existing step or instantiating a new operator).
+    All alternatives are pushed onto the frontier, giving complete search.
     """
 
     def __init__(
@@ -36,13 +46,6 @@ class DPOCLPlanner(BasePlanner[Plan, Plan]):
         heuristic: str = "zero",
         verbose: bool = False,
     ):
-        """Initialize the planner.
-
-        Args:
-            search_strategy: The search strategy to use
-            heuristic: The heuristic function to use
-            verbose: Whether to print verbose output
-        """
         self.search_strategy = search_strategy
         self.heuristic = heuristic
         self.verbose = verbose
@@ -67,13 +70,6 @@ class DPOCLPlanner(BasePlanner[Plan, Plan]):
         start_time = time.time()
         self.statistics = PlanningStatistics()
 
-        # This is a placeholder implementation
-        # The real implementation would:
-        # 1. Create initial plan from problem
-        # 2. Initialize search frontier
-        # 3. Main search loop with flaw resolution
-        # 4. Yield complete solutions as found
-
         if self.verbose:
             print(f"Starting DPOCL planning with {self.search_strategy} search")
             print(f"Using {self.heuristic} heuristic")
@@ -81,13 +77,67 @@ class DPOCLPlanner(BasePlanner[Plan, Plan]):
             if timeout:
                 print(f"Timeout: {timeout} seconds")
 
-        # Placeholder: return empty iterator for now
-        # Real implementation would have the main planning loop here
+        heuristic_fn = create_heuristic(self.heuristic)
+        frontier = create_search_strategy(self.search_strategy)
+
+        initial_plan = create_initial_plan(problem.initial_state, problem.goal_state)
+        priority = initial_plan.cost + heuristic_fn.estimate(initial_plan)
+        frontier.add_plan(initial_plan, priority=priority)
+
+        while not frontier.is_empty():
+            # --- bookkeeping ---
+            if timeout and (time.time() - start_time) > timeout:
+                self.statistics.timeout_reached = True
+                break
+            if self.statistics.solutions_found >= max_solutions:
+                break
+
+            plan = frontier.get_next_plan()
+            if plan is None:
+                break
+            self.statistics.nodes_visited += 1
+
+            # --- threat resolution (priority over open conditions) ---
+            threats = find_unresolved_threats(plan)
+            if threats:
+                link, threat_step = threats[0]
+                successors = resolve_threat(plan, link, threat_step)
+                self.statistics.nodes_expanded += 1
+                for s in successors:
+                    p = s.cost + heuristic_fn.estimate(s)
+                    frontier.add_plan(s, priority=p)
+                    self._track_frontier(frontier)
+                continue
+
+            # --- solution check (no flaws and no threats) ---
+            if plan.is_complete:
+                self.statistics.solutions_found += 1
+                if self.verbose:
+                    print(f"  Solution #{self.statistics.solutions_found} found "
+                          f"({len(plan.steps)} steps, depth {plan.depth})")
+                yield plan
+                continue
+
+            # --- open-condition expansion ---
+            flaw = plan.select_flaw()
+            if flaw is None:
+                continue
+
+            successors = expand_open_condition(plan, flaw, problem)
+            self.statistics.nodes_expanded += 1
+            for s in successors:
+                p = s.cost + heuristic_fn.estimate(s)
+                frontier.add_plan(s, priority=p)
+                self._track_frontier(frontier)
 
         self.statistics.time_elapsed = time.time() - start_time
 
-        if False:  # Placeholder condition
-            yield Plan()  # This would be replaced with actual solutions
+    # ------------------------------------------------------------------
+
+    def _track_frontier(self, frontier) -> None:
+        size = frontier.size()
+        if size > self.statistics.peak_frontier_size:
+            self.statistics.peak_frontier_size = size
 
     def get_statistics(self) -> dict[str, Any]:
         """Return planning statistics."""

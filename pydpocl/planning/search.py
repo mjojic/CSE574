@@ -32,23 +32,27 @@ class SearchStrategy(Protocol, Generic[T]):
 
 
 class BestFirstSearch:
-    """Best-first search using a priority queue."""
+    """Best-first search using a priority queue.
+
+    Heap entries are (priority, counter, plan).  The monotonic counter
+    guarantees a unique second element so Plan objects are never compared.
+    """
 
     def __init__(self) -> None:
-        self._frontier: list[Plan] = []
-        self._counter = 0  # For tie-breaking
+        self._frontier: list[tuple[float, int, Plan]] = []
+        self._counter = 0
 
-    def add_plan(self, plan: Plan) -> None:
-        """Add a plan to the frontier."""
-        # Use counter for stable sorting when plans have equal priority
-        heapq.heappush(self._frontier, (plan, self._counter))
+    def add_plan(self, plan: Plan, priority: float | None = None) -> None:
+        """Add a plan to the frontier with an explicit priority (lower = better)."""
+        p = priority if priority is not None else plan.cost
+        heapq.heappush(self._frontier, (p, self._counter, plan))
         self._counter += 1
 
     def get_next_plan(self) -> Plan | None:
         """Get the next plan to expand."""
         if not self._frontier:
             return None
-        plan, _ = heapq.heappop(self._frontier)
+        _, _, plan = heapq.heappop(self._frontier)
         return plan
 
     def is_empty(self) -> bool:
@@ -66,8 +70,8 @@ class BreadthFirstSearch:
     def __init__(self) -> None:
         self._frontier: deque[Plan] = deque()
 
-    def add_plan(self, plan: Plan) -> None:
-        """Add a plan to the frontier."""
+    def add_plan(self, plan: Plan, priority: float | None = None) -> None:
+        """Add a plan to the frontier (priority is ignored for FIFO)."""
         self._frontier.append(plan)
 
     def get_next_plan(self) -> Plan | None:
@@ -91,8 +95,8 @@ class DepthFirstSearch:
     def __init__(self) -> None:
         self._frontier: list[Plan] = []
 
-    def add_plan(self, plan: Plan) -> None:
-        """Add a plan to the frontier."""
+    def add_plan(self, plan: Plan, priority: float | None = None) -> None:
+        """Add a plan to the frontier (priority is ignored for LIFO)."""
         self._frontier.append(plan)
 
     def get_next_plan(self) -> Plan | None:
