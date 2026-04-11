@@ -14,7 +14,9 @@ from pydpocl.planning.pocl_expansion import (
     expand_open_condition,
     find_unresolved_threats,
     resolve_threat,
+    select_flaw_least_branching,
 )
+from pydpocl.planning.plan_fingerprint import structural_fingerprint
 from pydpocl.planning.search import create_search_strategy
 
 
@@ -28,6 +30,7 @@ class PlanningStatistics:
     time_elapsed: float = 0.0
     peak_frontier_size: int = 0
     timeout_reached: bool = False
+    duplicates_pruned: int = 0
 
 
 class DPOCLPlanner(BasePlanner[Plan, Plan]):
@@ -45,10 +48,16 @@ class DPOCLPlanner(BasePlanner[Plan, Plan]):
         search_strategy: str = "best_first",
         heuristic: str = "zero",
         verbose: bool = False,
+        dedupe_structural: bool = True,
+        flaw_order: str = "mrv",
     ):
         self.search_strategy = search_strategy
         self.heuristic = heuristic
         self.verbose = verbose
+        self.dedupe_structural = dedupe_structural
+        if flaw_order not in ("mrv", "priority"):
+            raise ValueError("flaw_order must be 'mrv' or 'priority'")
+        self.flaw_order = flaw_order
         self.statistics = PlanningStatistics()
 
     def solve(
@@ -79,10 +88,12 @@ class DPOCLPlanner(BasePlanner[Plan, Plan]):
 
         heuristic_fn = create_heuristic(self.heuristic)
         frontier = create_search_strategy(self.search_strategy)
+        # Structural fingerprints already enqueued or expanded — avoids revisiting
+        # the same partial plan reached via different expansion orders.
+        seen: set[tuple] = set()
 
         initial_plan = create_initial_plan(problem.initial_state, problem.goal_state)
-        priority = initial_plan.cost + heuristic_fn.estimate(initial_plan)
-        frontier.add_plan(initial_plan, priority=priority)
+        self._try_push(initial_plan, frontier, heuristic_fn, seen)
 
         while not frontier.is_empty():
             # --- bookkeeping ---
@@ -104,9 +115,7 @@ class DPOCLPlanner(BasePlanner[Plan, Plan]):
                 successors = resolve_threat(plan, link, threat_step)
                 self.statistics.nodes_expanded += 1
                 for s in successors:
-                    p = s.cost + heuristic_fn.estimate(s)
-                    frontier.add_plan(s, priority=p)
-                    self._track_frontier(frontier)
+                    self._try_push(s, frontier, heuristic_fn, seen)
                 continue
 
             # --- solution check (no flaws and no threats) ---
@@ -119,20 +128,38 @@ class DPOCLPlanner(BasePlanner[Plan, Plan]):
                 continue
 
             # --- open-condition expansion ---
-            flaw = plan.select_flaw()
+            if self.flaw_order == "mrv":
+                flaw = select_flaw_least_branching(plan, problem)
+            else:
+                flaw = plan.select_flaw()
             if flaw is None:
                 continue
 
             successors = expand_open_condition(plan, flaw, problem)
             self.statistics.nodes_expanded += 1
             for s in successors:
-                p = s.cost + heuristic_fn.estimate(s)
-                frontier.add_plan(s, priority=p)
-                self._track_frontier(frontier)
+                self._try_push(s, frontier, heuristic_fn, seen)
 
         self.statistics.time_elapsed = time.time() - start_time
 
     # ------------------------------------------------------------------
+
+    def _try_push(
+        self,
+        plan: Plan,
+        frontier,
+        heuristic_fn,
+        seen: set[tuple],
+    ) -> None:
+        if self.dedupe_structural:
+            fp = structural_fingerprint(plan)
+            if fp in seen:
+                self.statistics.duplicates_pruned += 1
+                return
+            seen.add(fp)
+        p = plan.cost + heuristic_fn.estimate(plan)
+        frontier.add_plan(plan, priority=p)
+        self._track_frontier(frontier)
 
     def _track_frontier(self, frontier) -> None:
         size = frontier.size()
@@ -148,4 +175,5 @@ class DPOCLPlanner(BasePlanner[Plan, Plan]):
             "time_elapsed": self.statistics.time_elapsed,
             "peak_frontier_size": self.statistics.peak_frontier_size,
             "timeout_reached": self.statistics.timeout_reached,
+            "duplicates_pruned": self.statistics.duplicates_pruned,
         }

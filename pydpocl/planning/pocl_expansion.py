@@ -56,6 +56,41 @@ def instantiate_operator(template: GroundStep) -> GroundStep:
     )
 
 
+def count_resolution_options(
+    plan: Plan,
+    flaw: OpenConditionFlaw,
+    problem: PlanningProblem,
+) -> int:
+    """How many distinct successors expand_open_condition would generate for *flaw*."""
+    consumer = flaw.step
+    needed = flaw.condition
+    n = 0
+    for step in plan.steps:
+        if step.id == consumer.id:
+            continue
+        if step.supports(needed):
+            n += 1
+    for op in problem.operators:
+        if op.supports(needed):
+            n += 1
+    return n
+
+
+def select_flaw_least_branching(
+    plan: Plan,
+    problem: PlanningProblem,
+) -> OpenConditionFlaw | None:
+    """Prefer flaws with the fewest possible resolvers (fail-first / MRV)."""
+    if not plan.flaws:
+        return None
+    scored: list[tuple[int, str, str, OpenConditionFlaw]] = []
+    for f in plan.flaws:
+        c = count_resolution_options(plan, f, problem)
+        scored.append((c, f.step.signature, f.condition.signature, f))
+    scored.sort(key=lambda x: (x[0], x[1], x[2]))
+    return scored[0][3]
+
+
 def expand_open_condition(
     plan: Plan,
     flaw: OpenConditionFlaw,
