@@ -53,6 +53,52 @@ def _camel(name):
     return ''.join(w.capitalize() for w in name.split('-'))
 
 
+def _parse_typed_symbols(tokens, strip_question=False):
+    """Parse PDDL typed lists into (symbol, type_name|None) pairs."""
+    if not tokens:
+        return []
+    if isinstance(tokens, str):
+        tokens = [tokens]
+
+    result = []
+    pending = []
+    i = 0
+    while i < len(tokens):
+        tok = tokens[i]
+        if tok == '-':
+            type_name = tokens[i + 1] if i + 1 < len(tokens) else None
+            for sym in pending:
+                result.append((sym, type_name))
+            pending = []
+            i += 2
+            continue
+        pending.append(tok)
+        i += 1
+
+    for sym in pending:
+        result.append((sym, None))
+
+    if strip_question:
+        result = [
+            (sym[1:] if isinstance(sym, str) and sym.startswith('?') else sym, t)
+            for sym, t in result
+        ]
+    return result
+
+
+def _build_param_domain(param_specs, default_type='object'):
+    """Build a conjunction like 'Block(x) & Block(y)' from typed parameters."""
+    if not param_specs:
+        return None
+    clauses = []
+    for param, type_name in param_specs:
+        if not param:
+            continue
+        pddl_type = type_name or default_type
+        clauses.append(f"{_camel(pddl_type)}({param})")
+    return ' & '.join(clauses) if clauses else None
+
+
 def _atom_str(sexp, obj_map=None):
     """['on', 'a', 'b'] → 'On(A, B)';  ['handempty'] → 'Handempty'."""
     if isinstance(sexp, str):
@@ -102,29 +148,39 @@ def parse_domain(filepath):
             else:
                 i += 1
 
-        params = [p[1:] for p in kw.get(':parameters', [])
-                  if isinstance(p, str) and p.startswith('?')]
+        param_specs = _parse_typed_symbols(
+            kw.get(':parameters', []), strip_question=True
+        )
+        params = [p for p, _ in param_specs if isinstance(p, str) and p]
         act_name = _camel(name)
         act_str = f"{act_name}({', '.join(params)})" if params else act_name
         precond = _formula_str(kw[':precondition']) if ':precondition' in kw else ''
         effect = _formula_str(kw[':effect']) if ':effect' in kw else ''
-        actions.append(Action(act_str, precond, effect))
+        domain = _build_param_domain(param_specs)
+        actions.append(Action(act_str, precond, effect, domain=domain))
 
     return actions
 
 
 def parse_instance(filepath):
-    """Parse a PDDL instance file.  Returns (objects, initial_str, goals_str)."""
+    """Parse a PDDL instance file. Returns (objects, initial_str, goals_str, domain_str)."""
     with open(filepath) as f:
         tree = _parse_sexp(_tokenize(f.read()))
 
     objects, init_atoms, goal_atoms = [], [], []
+    object_facts = []
     for section in tree:
         if not isinstance(section, list):
             continue
         tag = section[0]
         if tag == ':objects':
-            objects = [s for s in section[1:] if isinstance(s, str)]
+            typed_objects = _parse_typed_symbols(section[1:])
+            objects = [sym for sym, _ in typed_objects if isinstance(sym, str)]
+            for obj, typ in typed_objects:
+                if not isinstance(obj, str):
+                    continue
+                pddl_type = typ or 'object'
+                object_facts.append(f"{_camel(pddl_type)}({obj.upper()})")
         elif tag == ':init':
             init_atoms = section[1:]
         elif tag == ':goal':
@@ -134,14 +190,15 @@ def parse_instance(filepath):
     obj_map = {o: o.upper() for o in objects}
     init_str = ' & '.join(_atom_str(a, obj_map) for a in init_atoms)
     goal_str = ' & '.join(_atom_str(a, obj_map) for a in goal_atoms)
-    return objects, init_str, goal_str
+    domain_str = ' & '.join(object_facts)
+    return objects, init_str, goal_str, domain_str
 
 
 def load_problem(domain_path, instance_path):
     """Build a single PlanningProblem from a domain + instance file pair."""
     actions = parse_domain(domain_path)
-    _, initial, goals = parse_instance(instance_path)
-    return PlanningProblem(initial=initial, goals=goals, actions=actions)
+    _, initial, goals, domain = parse_instance(instance_path)
+    return PlanningProblem(initial=initial, goals=goals, actions=actions, domain=domain)
 
 
 def load_directory(domain_path, instance_dir):
@@ -154,9 +211,9 @@ def load_directory(domain_path, instance_dir):
     for fname in sorted(os.listdir(instance_dir)):
         if not fname.endswith('.pddl') or not fname.startswith('instance'):
             continue
-        _, initial, goals = parse_instance(os.path.join(instance_dir, fname))
+        _, initial, goals, domain = parse_instance(os.path.join(instance_dir, fname))
         problems[fname] = PlanningProblem(
-            initial=initial, goals=goals, actions=list(actions),
+            initial=initial, goals=goals, actions=list(actions), domain=domain,
         )
     return problems
 
