@@ -276,6 +276,101 @@ def print_table(instance_label: str, results: list[dict]) -> None:
         print("  " + "  ".join(row))
 
 
+def print_summary(case_reports: list[dict], total_cases: int) -> list[dict]:
+    """Print a per-combo aggregate summary and return the summary rows as dicts."""
+    # Collect all runs across every case, grouped by (strategy, heuristic, flaw_order).
+    from collections import defaultdict as _dd
+
+    combo_buckets: dict[tuple, list[dict]] = _dd(list)
+    for case in case_reports:
+        for run in case["runs"]:
+            key = (run["strategy"], run["heuristic"], run["flaw_order"])
+            combo_buckets[key].append(run)
+
+    rows: list[dict] = []
+    for key in combo_buckets:
+        strategy, heuristic, flaw_order = key
+        runs = combo_buckets[key]
+        n = len(runs)
+        solved_runs = [r for r in runs if r["solved"]]
+        timeout_runs = [r for r in runs if r["timeout_reached"]]
+        n_solved = len(solved_runs)
+        n_timeout = len(timeout_runs)
+        solve_rate = 100.0 * n_solved / n if n else 0.0
+
+        avg_time_solved = (
+            sum(r["wall_time_seconds"] for r in solved_runs) / n_solved
+            if n_solved else None
+        )
+        avg_nodes_solved = (
+            sum(r["nodes_visited"] for r in solved_runs) / n_solved
+            if n_solved else None
+        )
+        avg_plan_len = (
+            sum(r["plan_length"] for r in solved_runs) / n_solved
+            if n_solved else None
+        )
+
+        rows.append({
+            "strategy": strategy,
+            "heuristic": heuristic,
+            "flaw_order": flaw_order,
+            "total_instances": n,
+            "solved": n_solved,
+            "timeouts": n_timeout,
+            "solve_rate_pct": round(solve_rate, 1),
+            "avg_time_solved_s": round(avg_time_solved, 4) if avg_time_solved is not None else None,
+            "avg_nodes_visited_solved": round(avg_nodes_solved, 1) if avg_nodes_solved is not None else None,
+            "avg_plan_length_solved": round(avg_plan_len, 2) if avg_plan_len is not None else None,
+        })
+
+    # Sort: solve_rate desc, then avg_time_solved asc (None sorts last).
+    rows.sort(key=lambda r: (
+        -r["solve_rate_pct"],
+        r["avg_time_solved_s"] if r["avg_time_solved_s"] is not None else float("inf"),
+    ))
+
+    col_w = [14, 14, 10, 9, 8, 9, 11, 15, 20, 17]
+    headers = [
+        "Strategy",
+        "Heuristic",
+        "Flaw order",
+        "Instances",
+        "Solved",
+        "Timeouts",
+        "Solve rate",
+        "Avg time (s)",
+        "Avg nodes visited",
+        "Avg plan length",
+    ]
+    sep = "  ".join("-" * w for w in col_w)
+
+    print(f"\n{'#'*120}")
+    print(f"  SUMMARY  ({total_cases} instance(s))")
+    print(f"{'#'*120}")
+    print("  " + "  ".join(h.ljust(w) for h, w in zip(headers, col_w)))
+    print("  " + sep)
+    for r in rows:
+        avg_t = f"{r['avg_time_solved_s']:.4f}" if r["avg_time_solved_s"] is not None else "-"
+        avg_n = f"{r['avg_nodes_visited_solved']:.0f}" if r["avg_nodes_visited_solved"] is not None else "-"
+        avg_p = f"{r['avg_plan_length_solved']:.1f}" if r["avg_plan_length_solved"] is not None else "-"
+        row = [
+            r["strategy"].ljust(col_w[0]),
+            r["heuristic"].ljust(col_w[1]),
+            r["flaw_order"].ljust(col_w[2]),
+            str(r["total_instances"]).ljust(col_w[3]),
+            str(r["solved"]).ljust(col_w[4]),
+            str(r["timeouts"]).ljust(col_w[5]),
+            f"{r['solve_rate_pct']:.1f}%".ljust(col_w[6]),
+            avg_t.ljust(col_w[7]),
+            avg_n.ljust(col_w[8]),
+            avg_p.ljust(col_w[9]),
+        ]
+        print("  " + "  ".join(row))
+
+    return rows
+
+
 def print_plan(strategy: str, heuristic: str, flaw_order: str, steps) -> None:
     if not steps:
         return
@@ -295,6 +390,7 @@ def save_run_results(
     timeout: float,
     total_cases: int,
     case_reports: list[dict],
+    summary: list[dict],
     all_passed: bool,
     output_dir: Path = RESULTS_DIR,
 ) -> Path:
@@ -328,6 +424,7 @@ def save_run_results(
             },
             "total_cases": total_cases,
         },
+        "summary": summary,
         "cases": case_reports,
     }
     out_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
@@ -591,6 +688,8 @@ def main() -> None:
             }
         )
 
+    summary = print_summary(case_reports, total_cases=len(selected_cases))
+
     saved_path = save_run_results(
         selected_strategies=selected_strategies,
         selected_heuristics=selected_heuristics,
@@ -601,6 +700,7 @@ def main() -> None:
         timeout=args.timeout,
         total_cases=len(selected_cases),
         case_reports=case_reports,
+        summary=summary,
         all_passed=all_passed,
     )
 
