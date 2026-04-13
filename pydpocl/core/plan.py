@@ -63,10 +63,37 @@ class Plan(Identifiable):
         step_lookup = {step.step_id: step for step in self.steps}
         object.__setattr__(self, "_step_lookup", step_lookup)
 
+        step_ids = set(step_lookup.keys())
+
+        # Defensive cleanup: keep only references to existing steps.
+        # This prevents stale IDs from entering the ordering graph and
+        # causing topological execution failures.
+        valid_orderings = frozenset(
+            (before, after)
+            for before, after in self.orderings
+            if before in step_ids and after in step_ids
+        )
+        if len(valid_orderings) != len(self.orderings):
+            object.__setattr__(self, "orderings", valid_orderings)
+
+        valid_links = frozenset(
+            link
+            for link in self.causal_links
+            if link.source.step_id in step_ids and link.target.step_id in step_ids
+        )
+        if len(valid_links) != len(self.causal_links):
+            object.__setattr__(self, "causal_links", valid_links)
+
+        valid_flaws = frozenset(
+            flaw for flaw in self.flaws if flaw.step.step_id in step_ids
+        )
+        if len(valid_flaws) != len(self.flaws):
+            object.__setattr__(self, "flaws", valid_flaws)
+
         # Build ordering graph
         ordering_graph = nx.DiGraph()
         ordering_graph.add_nodes_from(step.step_id for step in self.steps)
-        ordering_graph.add_edges_from(self.orderings)
+        ordering_graph.add_edges_from(valid_orderings)
         object.__setattr__(self, "_ordering_graph", ordering_graph)
 
     @property
@@ -149,7 +176,7 @@ class Plan(Identifiable):
         """Return steps in topological order based on ordering constraints."""
         try:
             ordered_ids = list(nx.topological_sort(self.ordering_graph))
-            return [self.step_lookup[step_id] for step_id in ordered_ids]
+            return [self.step_lookup[step_id] for step_id in ordered_ids if step_id in self.step_lookup]
         except nx.NetworkXError:
             # Graph has cycles, return arbitrary order
             return list(self.steps)

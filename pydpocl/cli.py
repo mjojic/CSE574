@@ -9,8 +9,6 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 
 from pydpocl import __version__
-from pydpocl.core.literal import parse_literal
-from pydpocl.core.plan import create_initial_plan
 from pydpocl.domain.compiler import compile_domain_and_problem
 from pydpocl.planning.planner import DPOCLPlanner
 
@@ -91,8 +89,11 @@ def solve(
             task = progress.add_task("Compiling domain and problem...", total=None)
 
             try:
-                ground_steps = compile_domain_and_problem(domain_file, problem_file)
-                progress.update(task, description=f"Compiled {len(ground_steps)} ground steps")
+                problem = compile_domain_and_problem(domain_file, problem_file)
+                progress.update(
+                    task,
+                    description=f"Compiled {len(problem.operators)} ground steps",
+                )
             except Exception as e:
                 console.print(f"[red]Error compiling domain/problem:[/red] {e}")
                 sys.exit(1)
@@ -121,23 +122,14 @@ def solve(
             task = progress.add_task("Planning...", total=None)
 
             try:
-                # Note: This is a placeholder - actual implementation would use the real planner
-                # For now, create a dummy solution
-                initial_state = {parse_literal("at(robot, room1)")}
-                goal_state = {parse_literal("at(robot, room2)")}
-
-                initial_plan = create_initial_plan(initial_state, goal_state)
-                solutions = [initial_plan]  # Placeholder
-
-                stats = {
-                    "expanded_nodes": 42,
-                    "visited_nodes": 123,
-                    "time_elapsed": 1.5,
-                }
+                solutions = list(
+                    planner.solve(problem, max_solutions=max_solutions, timeout=timeout)
+                )
+                stats = planner.get_statistics()
 
                 progress.update(
                     task,
-                    description=f"Found {len(solutions)} solution(s)"
+                    description=f"Found {len(solutions)} solution(s)",
                 )
 
             except Exception as e:
@@ -225,10 +217,13 @@ def validate(
 
         # Compile and validate
         try:
-            ground_steps = compile_domain_and_problem(domain_file, problem_file)
+            problem = compile_domain_and_problem(domain_file, problem_file)
 
             if not quiet:
-                console.print(f"[green]✓[/green] Successfully compiled {len(ground_steps)} ground steps")
+                console.print(
+                    f"[green]✓[/green] Successfully compiled "
+                    f"{len(problem.operators)} ground steps"
+                )
                 console.print("[green]✓[/green] Domain and problem files are valid")
 
         except Exception as e:
@@ -261,7 +256,8 @@ def compile(
             console.print("Compiling domain and problem...")
 
         # Compile
-        ground_steps = compile_domain_and_problem(domain_file, problem_file)
+        problem = compile_domain_and_problem(domain_file, problem_file)
+        ground_steps = problem.operators
 
         if not quiet:
             console.print(f"[green]Successfully compiled {len(ground_steps)} ground steps[/green]")
@@ -269,7 +265,6 @@ def compile(
         # Save or display
         if output:
             try:
-                # Save ground steps (this would need a proper serialization format)
                 with open(output, "w") as f:
                     f.write(f"# Ground steps for {problem_file.name}\n")
                     f.write(f"# Total: {len(ground_steps)} steps\n\n")

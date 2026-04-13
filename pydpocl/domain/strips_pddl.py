@@ -24,6 +24,10 @@ class GroundPlanningProblem:
         return self.goal_state <= state
 
 
+# ---------------------------------------------------------------------------
+# Tokeniser and s-expression parser
+# ---------------------------------------------------------------------------
+
 def _strip_comments(text: str) -> str:
     return re.sub(r";[^\n]*", "", text)
 
@@ -57,6 +61,74 @@ def _get_blocks(expr: list, tag: str) -> list | None:
             return item
     return None
 
+
+# ---------------------------------------------------------------------------
+# Typed-list parsing (shared by :types, :objects, and :parameters)
+# ---------------------------------------------------------------------------
+
+def _parse_typed_list(tokens: list[str]) -> list[tuple[str, str]]:
+    """Parse a flat PDDL typed list into (name, type) pairs.
+
+    For example ``["a", "b", "-", "type1", "c", "-", "type2"]``
+    becomes ``[("a", "type1"), ("b", "type1"), ("c", "type2")]``.
+    Items that appear before any ``-`` separator default to type ``"object"``.
+    Type names are lowercased for case-insensitive matching.
+    """
+    result: list[tuple[str, str]] = []
+    pending: list[str] = []
+    i = 0
+    while i < len(tokens):
+        tok = tokens[i]
+        if tok == "-":
+            i += 1
+            typ = tokens[i].lower() if i < len(tokens) else "object"
+            for name in pending:
+                result.append((name, typ))
+            pending = []
+        else:
+            pending.append(tok)
+        i += 1
+    for name in pending:
+        result.append((name, "object"))
+    return result
+
+
+# ---------------------------------------------------------------------------
+# Type hierarchy
+# ---------------------------------------------------------------------------
+
+def _parse_types_block(block: list) -> dict[str, str]:
+    """Parse ``(:types ...)`` and return a child -> parent type mapping.
+
+    All user-defined types ultimately descend from ``"object"``.
+    """
+    tokens = [x for x in block[1:] if isinstance(x, str)]
+    typed = _parse_typed_list(tokens)
+    hierarchy: dict[str, str] = {"object": "object"}
+    for child, parent in typed:
+        hierarchy[child.lower()] = parent.lower()
+    return hierarchy
+
+
+def _is_subtype(child_type: str, required_type: str, hierarchy: dict[str, str]) -> bool:
+    """Return True if *child_type* is equal to or a subtype of *required_type*."""
+    child_type = child_type.lower()
+    required_type = required_type.lower()
+    if required_type == "object":
+        return True
+    current = child_type
+    visited: set[str] = set()
+    while current not in visited:
+        if current == required_type:
+            return True
+        visited.add(current)
+        current = hierarchy.get(current, "object")
+    return False
+
+
+# ---------------------------------------------------------------------------
+# Formula helpers
+# ---------------------------------------------------------------------------
 
 def _flatten_and(expr: list | str) -> list:
     if isinstance(expr, str):
@@ -99,31 +171,33 @@ def _formula_to_literals(sexp: list | str, subst: dict[str, str]) -> set[Literal
     return out
 
 
-def _parse_objects_block(block: list) -> list[str]:
-    # (:objects a b c) or typed lists — we only support flat untyped names
-    names: list[str] = []
-    for x in block[1:]:
-        if isinstance(x, str) and not x.startswith(":"):
-            names.append(x)
-        elif isinstance(x, list):
-            # (:objects a b - type c d - type) — take only names before '-'
-            for y in x:
-                if y == "-":
-                    break
-                if isinstance(y, str) and not y.startswith(":"):
-                    names.append(y)
-    return names
+# ---------------------------------------------------------------------------
+# Block parsers
+# ---------------------------------------------------------------------------
+
+def _parse_objects_block(block: list) -> list[tuple[str, str]]:
+    """Parse ``(:objects ...)`` and return ``(name, type)`` pairs.
+
+    Handles both typed (``name - Type``) and untyped object lists.
+    Untyped objects default to type ``"object"``.
+    """
+    tokens = [x for x in block[1:] if isinstance(x, str)]
+    return _parse_typed_list(tokens)
 
 
-def _parse_action(block: list) -> tuple[str, list[str], list, list]:
-    """Parse (:action name :parameters ... :precondition ... :effect ...).
+def _parse_action(
+    block: list,
+) -> tuple[str, list[tuple[str, str]], list, list]:
+    """Parse ``(:action name :parameters ... :precondition ... :effect ...)``.
 
-    PDDL often flattens keywords into one list (not nested sublists per keyword).
+    Returns ``(name, typed_params, precondition_sexp, effect_sexp)`` where
+    *typed_params* is a list of ``(varname, type)`` pairs.  Untyped parameters
+    get type ``"object"``.
     """
     if not block or block[0] != ":action":
         raise ValueError("Not an :action block")
     name = block[1]
-    params: list[str] = []
+    params_typed: list[tuple[str, str]] = []
     pre: list | None = None
     eff: list | None = None
     i = 2
@@ -133,7 +207,10 @@ def _parse_action(block: list) -> tuple[str, list[str], list, list]:
             i += 1
             plist = block[i]
             plist = plist if isinstance(plist, list) else [plist]
-            params = [p for p in plist if isinstance(p, str) and p.startswith("?")]
+            plist_strs = [p for p in plist if isinstance(p, str)]
+            all_typed = _parse_typed_list(plist_strs)
+            # Keep only entries whose name is a PDDL variable (starts with ?)
+            params_typed = [(n, t) for n, t in all_typed if n.startswith("?")]
             i += 1
         elif tag == ":precondition":
             i += 1
@@ -147,30 +224,62 @@ def _parse_action(block: list) -> tuple[str, list[str], list, list]:
             i += 1
     if pre is None or eff is None:
         raise ValueError(f"Missing precondition/effect in action {name}")
-    return name, params, pre, eff
+    return name, params_typed, pre, eff
 
+
+# ---------------------------------------------------------------------------
+# Grounding
+# ---------------------------------------------------------------------------
 
 def _groundings_for_params(
-    params: list[str],
-    objects: list[str],
+    params: list[tuple[str, str]],
+    typed_objects: list[tuple[str, str]],
+    type_hierarchy: dict[str, str],
 ) -> list[dict[str, str]]:
+    """Generate all type-compatible ground substitutions for *params*.
+
+    For each parameter only objects whose type is a subtype of (or equal to)
+    the parameter's declared type are considered.  For untyped domains all
+    objects default to type ``"object"`` and therefore match every parameter.
+
+    Returns a list of substitution dicts ``{varname: object_name}``.
+    """
     if not params:
         return [{}]
-    if len(params) == 1:
-        return [{params[0]: o} for o in objects]
-    # binary: all ordered pairs with distinct objects (standard for stack/unstack)
-    pairs = []
-    for a, b in itertools.product(objects, repeat=2):
-        if a != b:
-            pairs.append({params[0]: a, params[1]: b})
-    return pairs
 
+    candidates: list[list[str]] = []
+    for _varname, param_type in params:
+        compatible = [
+            obj_name
+            for obj_name, obj_type in typed_objects
+            if _is_subtype(obj_type, param_type, type_hierarchy)
+        ]
+        if not compatible:
+            return []
+        candidates.append(compatible)
+
+    result: list[dict[str, str]] = []
+    for combo in itertools.product(*candidates):
+        subst = {varname: obj for (varname, _), obj in zip(params, combo)}
+        result.append(subst)
+    return result
+
+
+# ---------------------------------------------------------------------------
+# Public compilation entry point
+# ---------------------------------------------------------------------------
 
 def compile_strips_pddl(domain_path: Path, problem_path: Path) -> GroundPlanningProblem:
     """Parse STRIPS domain + problem and return a fully grounded planning problem.
 
-    Supported: :strips, flat :objects, :init as conjunction of positive atoms,
-    :goal as (and ...). Actions use :parameters, :precondition, :effect with (and ...).
+    Supported PDDL features:
+    - ``(:requirements :strips)`` and ``(:requirements :strips :typing)``
+    - ``(:types ...)`` type hierarchy (child -> parent chain up to ``object``)
+    - Typed or untyped ``(:objects ...)``
+    - ``(:init ...)`` as a flat list of positive ground atoms
+    - ``(:goal (and ...))``
+    - Actions with typed or untyped ``(:parameters ...)``, ``(:precondition ...)``,
+      and ``(:effect ...)`` using conjunctions and ``(not ...)`` literals
     """
     domain_expr = parse_pddl(domain_path.read_text())
     problem_expr = parse_pddl(problem_path.read_text())
@@ -180,21 +289,28 @@ def compile_strips_pddl(domain_path: Path, problem_path: Path) -> GroundPlanning
     if not isinstance(problem_expr, list) or problem_expr[0] != "define":
         raise ValueError("Problem must start with (define ...)")
 
-    actions_raw: list[tuple[str, list[str], list, list]] = []
+    # Build type hierarchy from domain (trivial single-level for untyped domains)
+    types_b = _get_blocks(domain_expr, ":types")
+    type_hierarchy = _parse_types_block(types_b) if types_b else {"object": "object"}
+
+    # Extract action schemata
+    actions_raw: list[tuple[str, list[tuple[str, str]], list, list]] = []
     for item in domain_expr[2:]:
         if isinstance(item, list) and item and item[0] == ":action":
             actions_raw.append(_parse_action(item))
 
+    # Typed objects from problem
     pob = _get_blocks(problem_expr, ":objects")
     if pob is None:
         raise ValueError("Problem has no :objects")
-    objects = _parse_objects_block(pob)
+    typed_objects = _parse_objects_block(pob)
 
     init_b = _get_blocks(problem_expr, ":init")
     goal_b = _get_blocks(problem_expr, ":goal")
     if init_b is None or goal_b is None:
         raise ValueError("Problem needs :init and :goal")
-    # Init may be (:init (and ...)) or (:init atom atom ...) without top-level and
+
+    # Init may be (:init (and ...)) or (:init atom atom ...) without a top-level and
     init_rest = init_b[1:]
     if (
         len(init_rest) == 1
@@ -216,17 +332,18 @@ def compile_strips_pddl(domain_path: Path, problem_path: Path) -> GroundPlanning
 
     operators: list[GroundStep] = []
     step_no = 0
-    for name, params, pre, eff in actions_raw:
-        for subst in _groundings_for_params(params, objects):
+    for name, params_typed, pre, eff in actions_raw:
+        param_vars = [v for v, _ in params_typed]
+        for subst in _groundings_for_params(params_typed, typed_objects, type_hierarchy):
             try:
                 pre_lits = _formula_to_literals(pre, subst)
                 eff_lits = _formula_to_literals(eff, subst)
-            except (ValueError, IndexError, KeyError) as e:
+            except (ValueError, IndexError, KeyError):
                 continue
             operators.append(
                 GroundStep(
                     name=name,
-                    parameters=tuple(subst[p] for p in params),
+                    parameters=tuple(subst[v] for v in param_vars),
                     _preconditions=frozenset(pre_lits),
                     _effects=frozenset(eff_lits),
                     step_number=step_no,

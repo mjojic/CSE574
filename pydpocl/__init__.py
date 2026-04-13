@@ -8,6 +8,7 @@ from pydpocl.core.flaw_simple import CausalLink, OpenConditionFlaw
 from pydpocl.core.plan import Plan
 from pydpocl.core.step import Step
 from pydpocl.domain.compiler import compile_domain_and_problem
+from pydpocl.domain.strips_pddl import GroundPlanningProblem
 from pydpocl.planning.planner import DPOCLPlanner
 from pydpocl.planning.search import SearchStrategy
 
@@ -23,4 +24,5 @@ __all__ = [
     "DPOCLPlanner",
     "SearchStrategy",
     "compile_domain_and_problem",
+    "GroundPlanningProblem",
 ]
