@@ -1,0 +1,2266 @@
+{
+  "run_timestamp_local": "2026-04-12T22:09:48",
+  "all_passed": false,
+  "configuration": {
+    "timeout_seconds": 120.0,
+    "strategies": [
+      "best_first"
+    ],
+    "heuristics": [
+      "zero",
+      "goal_count",
+      "relaxed_plan"
+    ],
+    "flaw_orders": [
+      "mrv",
+      "priority"
+    ],
+    "problem_types": [
+      "generated",
+      "generated_basic",
+      "generated_basic_3",
+      "mystery"
+    ],
+    "max_per_type": 5,
+    "per_type_limits": {},
+    "total_cases": 20
+  },
+  "cases": [
+    {
+      "case_label": "generated/instance-1.pddl",
+      "problem_type": "generated",
+      "problem_path": "instances\\blocksworld\\generated\\instance-1.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": false,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "zero",
+          "flaw_order": "mrv",
+          "solved": false,
+          "timeout_reached": true,
+          "plan_length": null,
+          "nodes_visited": 15773,
+          "nodes_expanded": 15773,
+          "duplicates_pruned": 0,
+          "wall_time_seconds": 121.25887000001967,
+          "plan_signatures": []
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "zero",
+          "flaw_order": "priority",
+          "solved": false,
+          "timeout_reached": true,
+          "plan_length": null,
+          "nodes_visited": 23316,
+          "nodes_expanded": 23316,
+          "duplicates_pruned": 2432,
+          "wall_time_seconds": 123.07758499996271,
+          "plan_signatures": []
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "mrv",
+          "solved": false,
+          "timeout_reached": true,
+          "plan_length": null,
+          "nodes_visited": 14710,
+          "nodes_expanded": 14710,
+          "duplicates_pruned": 0,
+          "wall_time_seconds": 121.41943060001358,
+          "plan_signatures": []
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "priority",
+          "solved": false,
+          "timeout_reached": true,
+          "plan_length": null,
+          "nodes_visited": 48765,
+          "nodes_expanded": 48765,
+          "duplicates_pruned": 646,
+          "wall_time_seconds": 122.73253060004208,
+          "plan_signatures": []
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "relaxed_plan",
+          "flaw_order": "mrv",
+          "solved": false,
+          "timeout_reached": true,
+          "plan_length": null,
+          "nodes_visited": 14158,
+          "nodes_expanded": 14158,
+          "duplicates_pruned": 0,
+          "wall_time_seconds": 121.22467849997338,
+          "plan_signatures": []
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "relaxed_plan",
+          "flaw_order": "priority",
+          "solved": false,
+          "timeout_reached": true,
+          "plan_length": null,
+          "nodes_visited": 40768,
+          "nodes_expanded": 40768,
+          "duplicates_pruned": 1476,
+          "wall_time_seconds": 122.80570009991061,
+          "plan_signatures": []
+        }
+      ]
+    },
+    {
+      "case_label": "generated/instance-2.pddl",
+      "problem_type": "generated",
+      "problem_path": "instances\\blocksworld\\generated\\instance-2.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "zero",
+          "flaw_order": "mrv",
+          "solved": false,
+          "timeout_reached": true,
+          "plan_length": null,
+          "nodes_visited": 15364,
+          "nodes_expanded": 15364,
+          "duplicates_pruned": 3527,
+          "wall_time_seconds": 122.02921990002505,
+          "plan_signatures": []
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "zero",
+          "flaw_order": "priority",
+          "solved": false,
+          "timeout_reached": true,
+          "plan_length": null,
+          "nodes_visited": 24462,
+          "nodes_expanded": 24462,
+          "duplicates_pruned": 3438,
+          "wall_time_seconds": 123.18648590007797,
+          "plan_signatures": []
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 12,
+          "nodes_visited": 3612,
+          "nodes_expanded": 3611,
+          "duplicates_pruned": 70,
+          "wall_time_seconds": 22.99897079996299,
+          "plan_signatures": [
+            "unstack(h, i)",
+            "unstack(j, g)",
+            "unstack(g, a)",
+            "stack(h, i)",
+            "unstack(a, b)",
+            "unstack(b, k)",
+            "unstack(k, h)",
+            "stack(k, h)",
+            "stack(b, k)",
+            "stack(a, b)",
+            "stack(g, a)",
+            "stack(j, g)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "priority",
+          "solved": false,
+          "timeout_reached": true,
+          "plan_length": null,
+          "nodes_visited": 57609,
+          "nodes_expanded": 57609,
+          "duplicates_pruned": 875,
+          "wall_time_seconds": 127.33584110008087,
+          "plan_signatures": []
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "relaxed_plan",
+          "flaw_order": "mrv",
+          "solved": false,
+          "timeout_reached": true,
+          "plan_length": null,
+          "nodes_visited": 12390,
+          "nodes_expanded": 12390,
+          "duplicates_pruned": 9936,
+          "wall_time_seconds": 122.655772899976,
+          "plan_signatures": []
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "relaxed_plan",
+          "flaw_order": "priority",
+          "solved": false,
+          "timeout_reached": true,
+          "plan_length": null,
+          "nodes_visited": 49663,
+          "nodes_expanded": 49663,
+          "duplicates_pruned": 1027,
+          "wall_time_seconds": 122.99880850000773,
+          "plan_signatures": []
+        }
+      ]
+    },
+    {
+      "case_label": "generated/instance-3.pddl",
+      "problem_type": "generated",
+      "problem_path": "instances\\blocksworld\\generated\\instance-3.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "zero",
+          "flaw_order": "mrv",
+          "solved": false,
+          "timeout_reached": true,
+          "plan_length": null,
+          "nodes_visited": 15086,
+          "nodes_expanded": 15086,
+          "duplicates_pruned": 10629,
+          "wall_time_seconds": 122.61522410006728,
+          "plan_signatures": []
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "zero",
+          "flaw_order": "priority",
+          "solved": false,
+          "timeout_reached": true,
+          "plan_length": null,
+          "nodes_visited": 31011,
+          "nodes_expanded": 31011,
+          "duplicates_pruned": 3503,
+          "wall_time_seconds": 123.0707618999295,
+          "plan_signatures": []
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 10,
+          "nodes_visited": 734,
+          "nodes_expanded": 733,
+          "duplicates_pruned": 32,
+          "wall_time_seconds": 7.752651899936609,
+          "plan_signatures": [
+            "unstack(j, a)",
+            "unstack(k, c)",
+            "unstack(c, i)",
+            "stack(c, i)",
+            "stack(k, c)",
+            "unstack(f, k)",
+            "stack(f, k)",
+            "unstack(a, f)",
+            "stack(a, f)",
+            "stack(j, a)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 10,
+          "nodes_visited": 18740,
+          "nodes_expanded": 18739,
+          "duplicates_pruned": 310,
+          "wall_time_seconds": 34.10279569996055,
+          "plan_signatures": [
+            "unstack(f, k)",
+            "stack(f, k)",
+            "unstack(j, a)",
+            "unstack(k, c)",
+            "stack(j, a)",
+            "stack(k, c)",
+            "unstack(a, f)",
+            "unstack(c, i)",
+            "stack(a, f)",
+            "stack(c, i)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "relaxed_plan",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 10,
+          "nodes_visited": 771,
+          "nodes_expanded": 770,
+          "duplicates_pruned": 108,
+          "wall_time_seconds": 3.3283060000976548,
+          "plan_signatures": [
+            "unstack(k, c)",
+            "unstack(c, i)",
+            "stack(c, i)",
+            "unstack(f, k)",
+            "stack(k, c)",
+            "unstack(j, a)",
+            "stack(f, k)",
+            "unstack(a, f)",
+            "stack(a, f)",
+            "stack(j, a)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "relaxed_plan",
+          "flaw_order": "priority",
+          "solved": false,
+          "timeout_reached": true,
+          "plan_length": null,
+          "nodes_visited": 50947,
+          "nodes_expanded": 50947,
+          "duplicates_pruned": 1970,
+          "wall_time_seconds": 127.4441547000315,
+          "plan_signatures": []
+        }
+      ]
+    },
+    {
+      "case_label": "generated/instance-4.pddl",
+      "problem_type": "generated",
+      "problem_path": "instances\\blocksworld\\generated\\instance-4.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "zero",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 6,
+          "nodes_visited": 644,
+          "nodes_expanded": 643,
+          "duplicates_pruned": 369,
+          "wall_time_seconds": 2.095467900042422,
+          "plan_signatures": [
+            "unstack(f, b)",
+            "stack(f, b)",
+            "unstack(j, f)",
+            "stack(j, f)",
+            "pick-up(g)",
+            "stack(g, j)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "zero",
+          "flaw_order": "priority",
+          "solved": false,
+          "timeout_reached": true,
+          "plan_length": null,
+          "nodes_visited": 48316,
+          "nodes_expanded": 48316,
+          "duplicates_pruned": 8528,
+          "wall_time_seconds": 122.61821159999818,
+          "plan_signatures": []
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 6,
+          "nodes_visited": 53,
+          "nodes_expanded": 52,
+          "duplicates_pruned": 10,
+          "wall_time_seconds": 0.11783130001276731,
+          "plan_signatures": [
+            "unstack(f, b)",
+            "stack(f, b)",
+            "unstack(j, f)",
+            "stack(j, f)",
+            "unstack(g, j)",
+            "stack(g, j)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 6,
+          "nodes_visited": 345,
+          "nodes_expanded": 344,
+          "duplicates_pruned": 5,
+          "wall_time_seconds": 0.3870185000123456,
+          "plan_signatures": [
+            "unstack(g, j)",
+            "stack(g, j)",
+            "unstack(j, f)",
+            "stack(j, f)",
+            "unstack(f, b)",
+            "stack(f, b)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "relaxed_plan",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 6,
+          "nodes_visited": 53,
+          "nodes_expanded": 52,
+          "duplicates_pruned": 10,
+          "wall_time_seconds": 0.12137589999474585,
+          "plan_signatures": [
+            "unstack(f, b)",
+            "stack(f, b)",
+            "unstack(j, f)",
+            "stack(j, f)",
+            "unstack(g, j)",
+            "stack(g, j)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "relaxed_plan",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 6,
+          "nodes_visited": 2293,
+          "nodes_expanded": 2292,
+          "duplicates_pruned": 146,
+          "wall_time_seconds": 2.826656899997033,
+          "plan_signatures": [
+            "unstack(g, j)",
+            "unstack(f, b)",
+            "stack(g, j)",
+            "stack(f, b)",
+            "unstack(j, f)",
+            "stack(j, f)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "generated/instance-5.pddl",
+      "problem_type": "generated",
+      "problem_path": "instances\\blocksworld\\generated\\instance-5.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": false,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "zero",
+          "flaw_order": "mrv",
+          "solved": false,
+          "timeout_reached": true,
+          "plan_length": null,
+          "nodes_visited": 10216,
+          "nodes_expanded": 10216,
+          "duplicates_pruned": 0,
+          "wall_time_seconds": 121.12229120009579,
+          "plan_signatures": []
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "zero",
+          "flaw_order": "priority",
+          "solved": false,
+          "timeout_reached": true,
+          "plan_length": null,
+          "nodes_visited": 15288,
+          "nodes_expanded": 15288,
+          "duplicates_pruned": 738,
+          "wall_time_seconds": 123.29696349997539,
+          "plan_signatures": []
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "mrv",
+          "solved": false,
+          "timeout_reached": true,
+          "plan_length": null,
+          "nodes_visited": 8908,
+          "nodes_expanded": 8908,
+          "duplicates_pruned": 0,
+          "wall_time_seconds": 121.34586710005533,
+          "plan_signatures": []
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "priority",
+          "solved": false,
+          "timeout_reached": true,
+          "plan_length": null,
+          "nodes_visited": 38974,
+          "nodes_expanded": 38974,
+          "duplicates_pruned": 536,
+          "wall_time_seconds": 123.16906869993545,
+          "plan_signatures": []
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "relaxed_plan",
+          "flaw_order": "mrv",
+          "solved": false,
+          "timeout_reached": true,
+          "plan_length": null,
+          "nodes_visited": 8969,
+          "nodes_expanded": 8969,
+          "duplicates_pruned": 0,
+          "wall_time_seconds": 121.41828989994247,
+          "plan_signatures": []
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "relaxed_plan",
+          "flaw_order": "priority",
+          "solved": false,
+          "timeout_reached": true,
+          "plan_length": null,
+          "nodes_visited": 30003,
+          "nodes_expanded": 30003,
+          "duplicates_pruned": 1446,
+          "wall_time_seconds": 128.10544359998312,
+          "plan_signatures": []
+        }
+      ]
+    },
+    {
+      "case_label": "generated_basic/instance-1.pddl",
+      "problem_type": "generated_basic",
+      "problem_path": "instances\\blocksworld\\generated_basic\\instance-1.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "zero",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 50,
+          "nodes_expanded": 49,
+          "duplicates_pruned": 10,
+          "wall_time_seconds": 0.13392569997813553,
+          "plan_signatures": [
+            "put-down(c)",
+            "unstack(c, b)",
+            "stack(c, b)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "zero",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 185,
+          "nodes_expanded": 184,
+          "duplicates_pruned": 32,
+          "wall_time_seconds": 0.3360681999474764,
+          "plan_signatures": [
+            "put-down(c)",
+            "unstack(c, b)",
+            "stack(c, b)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 6,
+          "nodes_expanded": 5,
+          "duplicates_pruned": 1,
+          "wall_time_seconds": 0.01413020002655685,
+          "plan_signatures": [
+            "put-down(c)",
+            "unstack(c, b)",
+            "stack(c, b)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 6,
+          "nodes_expanded": 5,
+          "duplicates_pruned": 0,
+          "wall_time_seconds": 0.013409400009550154,
+          "plan_signatures": [
+            "put-down(c)",
+            "unstack(c, b)",
+            "stack(c, b)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "relaxed_plan",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 11,
+          "nodes_expanded": 10,
+          "duplicates_pruned": 1,
+          "wall_time_seconds": 0.01639420003630221,
+          "plan_signatures": [
+            "put-down(c)",
+            "unstack(c, b)",
+            "stack(c, b)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "relaxed_plan",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 7,
+          "nodes_expanded": 6,
+          "duplicates_pruned": 0,
+          "wall_time_seconds": 0.01184420008212328,
+          "plan_signatures": [
+            "put-down(c)",
+            "unstack(c, b)",
+            "stack(c, b)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "generated_basic/instance-2.pddl",
+      "problem_type": "generated_basic",
+      "problem_path": "instances\\blocksworld\\generated_basic\\instance-2.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "zero",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 47,
+          "nodes_expanded": 46,
+          "duplicates_pruned": 9,
+          "wall_time_seconds": 0.11971859994810075,
+          "plan_signatures": [
+            "put-down(c)",
+            "unstack(c, a)",
+            "stack(c, a)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "zero",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 194,
+          "nodes_expanded": 193,
+          "duplicates_pruned": 30,
+          "wall_time_seconds": 0.33958279993385077,
+          "plan_signatures": [
+            "put-down(c)",
+            "unstack(c, a)",
+            "stack(c, a)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 6,
+          "nodes_expanded": 5,
+          "duplicates_pruned": 1,
+          "wall_time_seconds": 0.011246900074183941,
+          "plan_signatures": [
+            "put-down(c)",
+            "unstack(c, a)",
+            "stack(c, a)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 7,
+          "nodes_expanded": 6,
+          "duplicates_pruned": 0,
+          "wall_time_seconds": 0.015253699966706336,
+          "plan_signatures": [
+            "put-down(c)",
+            "unstack(c, a)",
+            "stack(c, a)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "relaxed_plan",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 11,
+          "nodes_expanded": 10,
+          "duplicates_pruned": 1,
+          "wall_time_seconds": 0.02139579993672669,
+          "plan_signatures": [
+            "put-down(c)",
+            "unstack(c, a)",
+            "stack(c, a)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "relaxed_plan",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 7,
+          "nodes_expanded": 6,
+          "duplicates_pruned": 0,
+          "wall_time_seconds": 0.013616799958981574,
+          "plan_signatures": [
+            "put-down(c)",
+            "unstack(c, a)",
+            "stack(c, a)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "generated_basic/instance-3.pddl",
+      "problem_type": "generated_basic",
+      "problem_path": "instances\\blocksworld\\generated_basic\\instance-3.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "zero",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 51,
+          "nodes_expanded": 50,
+          "duplicates_pruned": 2,
+          "wall_time_seconds": 0.07727510004770011,
+          "plan_signatures": [
+            "put-down(a)",
+            "unstack(a, c)",
+            "stack(a, c)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "zero",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 372,
+          "nodes_expanded": 371,
+          "duplicates_pruned": 55,
+          "wall_time_seconds": 3.1157373000169173,
+          "plan_signatures": [
+            "put-down(a)",
+            "unstack(a, c)",
+            "stack(a, c)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 7,
+          "nodes_expanded": 6,
+          "duplicates_pruned": 1,
+          "wall_time_seconds": 0.015225499984808266,
+          "plan_signatures": [
+            "put-down(a)",
+            "unstack(a, c)",
+            "stack(a, c)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 8,
+          "nodes_expanded": 7,
+          "duplicates_pruned": 0,
+          "wall_time_seconds": 0.01589579996652901,
+          "plan_signatures": [
+            "put-down(a)",
+            "unstack(a, c)",
+            "stack(a, c)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "relaxed_plan",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 7,
+          "nodes_expanded": 6,
+          "duplicates_pruned": 1,
+          "wall_time_seconds": 0.012553699896670878,
+          "plan_signatures": [
+            "put-down(a)",
+            "unstack(a, c)",
+            "stack(a, c)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "relaxed_plan",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 7,
+          "nodes_expanded": 6,
+          "duplicates_pruned": 0,
+          "wall_time_seconds": 0.015179699985310435,
+          "plan_signatures": [
+            "put-down(a)",
+            "unstack(a, c)",
+            "stack(a, c)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "generated_basic/instance-4.pddl",
+      "problem_type": "generated_basic",
+      "problem_path": "instances\\blocksworld\\generated_basic\\instance-4.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "zero",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 5,
+          "nodes_visited": 242,
+          "nodes_expanded": 241,
+          "duplicates_pruned": 79,
+          "wall_time_seconds": 0.6915031999815255,
+          "plan_signatures": [
+            "put-down(a)",
+            "unstack(d, b)",
+            "stack(d, b)",
+            "unstack(a, d)",
+            "stack(a, d)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "zero",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 5,
+          "nodes_visited": 24563,
+          "nodes_expanded": 24562,
+          "duplicates_pruned": 4759,
+          "wall_time_seconds": 63.580829399987124,
+          "plan_signatures": [
+            "put-down(a)",
+            "unstack(a, d)",
+            "stack(a, d)",
+            "unstack(d, b)",
+            "stack(d, b)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 5,
+          "nodes_visited": 19,
+          "nodes_expanded": 18,
+          "duplicates_pruned": 6,
+          "wall_time_seconds": 0.04527970007620752,
+          "plan_signatures": [
+            "put-down(a)",
+            "unstack(d, b)",
+            "stack(d, b)",
+            "unstack(a, d)",
+            "stack(a, d)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 5,
+          "nodes_visited": 32,
+          "nodes_expanded": 31,
+          "duplicates_pruned": 1,
+          "wall_time_seconds": 0.04249140003230423,
+          "plan_signatures": [
+            "put-down(a)",
+            "unstack(d, b)",
+            "stack(d, b)",
+            "unstack(a, d)",
+            "stack(a, d)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "relaxed_plan",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 5,
+          "nodes_visited": 24,
+          "nodes_expanded": 23,
+          "duplicates_pruned": 6,
+          "wall_time_seconds": 0.059965499909594655,
+          "plan_signatures": [
+            "unstack(d, b)",
+            "put-down(a)",
+            "stack(d, b)",
+            "unstack(a, d)",
+            "stack(a, d)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "relaxed_plan",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 5,
+          "nodes_visited": 541,
+          "nodes_expanded": 540,
+          "duplicates_pruned": 67,
+          "wall_time_seconds": 0.6986057999311015,
+          "plan_signatures": [
+            "put-down(a)",
+            "unstack(a, d)",
+            "stack(a, d)",
+            "unstack(d, b)",
+            "stack(d, b)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "generated_basic/instance-5.pddl",
+      "problem_type": "generated_basic",
+      "problem_path": "instances\\blocksworld\\generated_basic\\instance-5.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "zero",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 2,
+          "nodes_visited": 17,
+          "nodes_expanded": 16,
+          "duplicates_pruned": 0,
+          "wall_time_seconds": 0.03239339997526258,
+          "plan_signatures": [
+            "unstack(d, c)",
+            "stack(d, c)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "zero",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 2,
+          "nodes_visited": 27,
+          "nodes_expanded": 26,
+          "duplicates_pruned": 1,
+          "wall_time_seconds": 0.054162299958989024,
+          "plan_signatures": [
+            "unstack(d, c)",
+            "stack(d, c)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 2,
+          "nodes_visited": 7,
+          "nodes_expanded": 6,
+          "duplicates_pruned": 0,
+          "wall_time_seconds": 0.013609900022856891,
+          "plan_signatures": [
+            "unstack(d, c)",
+            "stack(d, c)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 2,
+          "nodes_visited": 8,
+          "nodes_expanded": 7,
+          "duplicates_pruned": 0,
+          "wall_time_seconds": 0.014560300041921437,
+          "plan_signatures": [
+            "unstack(d, c)",
+            "stack(d, c)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "relaxed_plan",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 2,
+          "nodes_visited": 7,
+          "nodes_expanded": 6,
+          "duplicates_pruned": 0,
+          "wall_time_seconds": 0.01112979999743402,
+          "plan_signatures": [
+            "unstack(d, c)",
+            "stack(d, c)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "relaxed_plan",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 2,
+          "nodes_visited": 7,
+          "nodes_expanded": 6,
+          "duplicates_pruned": 0,
+          "wall_time_seconds": 0.012723100022412837,
+          "plan_signatures": [
+            "unstack(d, c)",
+            "stack(d, c)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "generated_basic_3/instance-1.pddl",
+      "problem_type": "generated_basic_3",
+      "problem_path": "instances\\blocksworld\\generated_basic_3\\instance-1.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "zero",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 4,
+          "nodes_visited": 211,
+          "nodes_expanded": 210,
+          "duplicates_pruned": 48,
+          "wall_time_seconds": 0.390117600094527,
+          "plan_signatures": [
+            "unstack(c, a)",
+            "unstack(a, b)",
+            "stack(a, b)",
+            "stack(c, a)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "zero",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 4,
+          "nodes_visited": 1081,
+          "nodes_expanded": 1080,
+          "duplicates_pruned": 200,
+          "wall_time_seconds": 1.5271674999967217,
+          "plan_signatures": [
+            "unstack(c, a)",
+            "stack(c, a)",
+            "unstack(a, b)",
+            "stack(a, b)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 4,
+          "nodes_visited": 21,
+          "nodes_expanded": 20,
+          "duplicates_pruned": 4,
+          "wall_time_seconds": 0.03471969999372959,
+          "plan_signatures": [
+            "unstack(c, a)",
+            "unstack(a, b)",
+            "stack(a, b)",
+            "stack(c, a)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 4,
+          "nodes_visited": 21,
+          "nodes_expanded": 20,
+          "duplicates_pruned": 0,
+          "wall_time_seconds": 0.021018499974161386,
+          "plan_signatures": [
+            "unstack(c, a)",
+            "stack(c, a)",
+            "unstack(a, b)",
+            "stack(a, b)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "relaxed_plan",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 4,
+          "nodes_visited": 21,
+          "nodes_expanded": 20,
+          "duplicates_pruned": 4,
+          "wall_time_seconds": 0.030576999997720122,
+          "plan_signatures": [
+            "unstack(c, a)",
+            "unstack(a, b)",
+            "stack(a, b)",
+            "stack(c, a)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "relaxed_plan",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 4,
+          "nodes_visited": 51,
+          "nodes_expanded": 50,
+          "duplicates_pruned": 2,
+          "wall_time_seconds": 0.05210049997549504,
+          "plan_signatures": [
+            "unstack(c, a)",
+            "stack(c, a)",
+            "unstack(a, b)",
+            "stack(a, b)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "generated_basic_3/instance-2.pddl",
+      "problem_type": "generated_basic_3",
+      "problem_path": "instances\\blocksworld\\generated_basic_3\\instance-2.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "zero",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 4,
+          "nodes_visited": 99,
+          "nodes_expanded": 98,
+          "duplicates_pruned": 32,
+          "wall_time_seconds": 0.1935131000354886,
+          "plan_signatures": [
+            "unstack(a, c)",
+            "stack(a, c)",
+            "pick-up(b)",
+            "stack(b, a)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "zero",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 4,
+          "nodes_visited": 2334,
+          "nodes_expanded": 2333,
+          "duplicates_pruned": 463,
+          "wall_time_seconds": 3.306252000038512,
+          "plan_signatures": [
+            "unstack(a, c)",
+            "unstack(b, a)",
+            "stack(a, c)",
+            "stack(b, a)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 4,
+          "nodes_visited": 20,
+          "nodes_expanded": 19,
+          "duplicates_pruned": 5,
+          "wall_time_seconds": 0.03644070005975664,
+          "plan_signatures": [
+            "unstack(a, c)",
+            "stack(a, c)",
+            "unstack(b, a)",
+            "stack(b, a)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 4,
+          "nodes_visited": 39,
+          "nodes_expanded": 38,
+          "duplicates_pruned": 2,
+          "wall_time_seconds": 0.0343950999667868,
+          "plan_signatures": [
+            "unstack(b, a)",
+            "stack(b, a)",
+            "unstack(a, c)",
+            "stack(a, c)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "relaxed_plan",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 4,
+          "nodes_visited": 20,
+          "nodes_expanded": 19,
+          "duplicates_pruned": 5,
+          "wall_time_seconds": 0.036306200083345175,
+          "plan_signatures": [
+            "unstack(a, c)",
+            "stack(a, c)",
+            "unstack(b, a)",
+            "stack(b, a)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "relaxed_plan",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 4,
+          "nodes_visited": 122,
+          "nodes_expanded": 121,
+          "duplicates_pruned": 6,
+          "wall_time_seconds": 0.1434241000097245,
+          "plan_signatures": [
+            "unstack(b, a)",
+            "stack(b, a)",
+            "unstack(a, c)",
+            "stack(a, c)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "generated_basic_3/instance-3.pddl",
+      "problem_type": "generated_basic_3",
+      "problem_path": "instances\\blocksworld\\generated_basic_3\\instance-3.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "zero",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 4,
+          "nodes_visited": 129,
+          "nodes_expanded": 128,
+          "duplicates_pruned": 36,
+          "wall_time_seconds": 0.23480460001155734,
+          "plan_signatures": [
+            "unstack(b, c)",
+            "unstack(c, a)",
+            "stack(b, a)",
+            "stack(c, b)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "zero",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 5,
+          "nodes_visited": 6586,
+          "nodes_expanded": 6585,
+          "duplicates_pruned": 1696,
+          "wall_time_seconds": 15.662347599980421,
+          "plan_signatures": [
+            "put-down(c)",
+            "unstack(c, b)",
+            "stack(c, b)",
+            "unstack(b, a)",
+            "stack(b, a)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 5,
+          "nodes_visited": 21,
+          "nodes_expanded": 20,
+          "duplicates_pruned": 8,
+          "wall_time_seconds": 0.032344100065529346,
+          "plan_signatures": [
+            "put-down(c)",
+            "unstack(b, a)",
+            "stack(b, a)",
+            "unstack(c, b)",
+            "stack(c, b)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 5,
+          "nodes_visited": 106,
+          "nodes_expanded": 105,
+          "duplicates_pruned": 12,
+          "wall_time_seconds": 0.10451720003038645,
+          "plan_signatures": [
+            "put-down(c)",
+            "unstack(c, b)",
+            "stack(c, b)",
+            "unstack(b, a)",
+            "stack(b, a)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "relaxed_plan",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 5,
+          "nodes_visited": 24,
+          "nodes_expanded": 23,
+          "duplicates_pruned": 8,
+          "wall_time_seconds": 0.04400839994195849,
+          "plan_signatures": [
+            "put-down(c)",
+            "unstack(b, a)",
+            "stack(b, a)",
+            "unstack(c, b)",
+            "stack(c, b)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "relaxed_plan",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 5,
+          "nodes_visited": 188,
+          "nodes_expanded": 187,
+          "duplicates_pruned": 15,
+          "wall_time_seconds": 0.21022830007132143,
+          "plan_signatures": [
+            "unstack(b, a)",
+            "put-down(c)",
+            "stack(b, a)",
+            "unstack(c, b)",
+            "stack(c, b)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "generated_basic_3/instance-4.pddl",
+      "problem_type": "generated_basic_3",
+      "problem_path": "instances\\blocksworld\\generated_basic_3\\instance-4.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "zero",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 41,
+          "nodes_expanded": 40,
+          "duplicates_pruned": 8,
+          "wall_time_seconds": 0.06027610006276518,
+          "plan_signatures": [
+            "put-down(b)",
+            "unstack(b, c)",
+            "stack(b, a)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "zero",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 89,
+          "nodes_expanded": 88,
+          "duplicates_pruned": 17,
+          "wall_time_seconds": 0.13735289999749511,
+          "plan_signatures": [
+            "put-down(b)",
+            "unstack(b, a)",
+            "stack(b, a)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 6,
+          "nodes_expanded": 5,
+          "duplicates_pruned": 1,
+          "wall_time_seconds": 0.007696500048041344,
+          "plan_signatures": [
+            "put-down(b)",
+            "unstack(b, a)",
+            "stack(b, a)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 7,
+          "nodes_expanded": 6,
+          "duplicates_pruned": 0,
+          "wall_time_seconds": 0.011851900024339557,
+          "plan_signatures": [
+            "put-down(b)",
+            "unstack(b, a)",
+            "stack(b, a)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "relaxed_plan",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 10,
+          "nodes_expanded": 9,
+          "duplicates_pruned": 1,
+          "wall_time_seconds": 0.013580100028775632,
+          "plan_signatures": [
+            "put-down(b)",
+            "unstack(b, c)",
+            "stack(b, a)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "relaxed_plan",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 7,
+          "nodes_expanded": 6,
+          "duplicates_pruned": 0,
+          "wall_time_seconds": 0.011157000088132918,
+          "plan_signatures": [
+            "put-down(b)",
+            "unstack(b, a)",
+            "stack(b, a)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "generated_basic_3/instance-5.pddl",
+      "problem_type": "generated_basic_3",
+      "problem_path": "instances\\blocksworld\\generated_basic_3\\instance-5.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "zero",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 42,
+          "nodes_expanded": 41,
+          "duplicates_pruned": 9,
+          "wall_time_seconds": 0.07646010001190007,
+          "plan_signatures": [
+            "put-down(c)",
+            "unstack(c, a)",
+            "stack(c, a)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "zero",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 193,
+          "nodes_expanded": 192,
+          "duplicates_pruned": 10,
+          "wall_time_seconds": 0.2371533999685198,
+          "plan_signatures": [
+            "put-down(c)",
+            "pick-up(c)",
+            "stack(c, a)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 7,
+          "nodes_expanded": 6,
+          "duplicates_pruned": 1,
+          "wall_time_seconds": 0.01010879990644753,
+          "plan_signatures": [
+            "put-down(c)",
+            "unstack(c, a)",
+            "stack(c, a)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 7,
+          "nodes_expanded": 6,
+          "duplicates_pruned": 0,
+          "wall_time_seconds": 0.007990499958395958,
+          "plan_signatures": [
+            "put-down(c)",
+            "unstack(c, a)",
+            "stack(c, a)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "relaxed_plan",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 12,
+          "nodes_expanded": 11,
+          "duplicates_pruned": 1,
+          "wall_time_seconds": 0.015421499963849783,
+          "plan_signatures": [
+            "put-down(c)",
+            "unstack(c, a)",
+            "stack(c, a)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "relaxed_plan",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 9,
+          "nodes_expanded": 8,
+          "duplicates_pruned": 0,
+          "wall_time_seconds": 0.011232399963773787,
+          "plan_signatures": [
+            "put-down(c)",
+            "unstack(c, a)",
+            "stack(c, a)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "mystery/generated_basic/instance-0.pddl",
+      "problem_type": "mystery",
+      "problem_path": "instances\\blocksworld\\mystery\\generated_basic\\instance-0.pddl",
+      "domain_path": "instances\\blocksworld\\mystery\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "zero",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 5,
+          "nodes_visited": 200,
+          "nodes_expanded": 199,
+          "duplicates_pruned": 55,
+          "wall_time_seconds": 0.5924427999416366,
+          "plan_signatures": [
+            "succumb(d)",
+            "feast(b, c)",
+            "overcome(b, c)",
+            "attack(d)",
+            "overcome(d, b)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "zero",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 5,
+          "nodes_visited": 6341,
+          "nodes_expanded": 6340,
+          "duplicates_pruned": 892,
+          "wall_time_seconds": 11.146632600110024,
+          "plan_signatures": [
+            "feast(b, c)",
+            "succumb(d)",
+            "overcome(b, c)",
+            "feast(d, b)",
+            "overcome(d, b)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 5,
+          "nodes_visited": 28,
+          "nodes_expanded": 27,
+          "duplicates_pruned": 6,
+          "wall_time_seconds": 0.05852139997296035,
+          "plan_signatures": [
+            "succumb(d)",
+            "feast(d, b)",
+            "feast(b, c)",
+            "overcome(b, c)",
+            "overcome(d, b)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 5,
+          "nodes_visited": 25,
+          "nodes_expanded": 24,
+          "duplicates_pruned": 1,
+          "wall_time_seconds": 0.03351540002040565,
+          "plan_signatures": [
+            "succumb(d)",
+            "feast(b, c)",
+            "feast(d, b)",
+            "overcome(b, c)",
+            "overcome(d, b)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "relaxed_plan",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 5,
+          "nodes_visited": 45,
+          "nodes_expanded": 44,
+          "duplicates_pruned": 9,
+          "wall_time_seconds": 0.0823757000034675,
+          "plan_signatures": [
+            "succumb(d)",
+            "feast(b, c)",
+            "overcome(b, c)",
+            "feast(d, b)",
+            "overcome(d, b)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "relaxed_plan",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 5,
+          "nodes_visited": 67,
+          "nodes_expanded": 66,
+          "duplicates_pruned": 2,
+          "wall_time_seconds": 0.09573149995412678,
+          "plan_signatures": [
+            "succumb(d)",
+            "feast(d, b)",
+            "overcome(d, b)",
+            "feast(b, c)",
+            "overcome(b, c)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "mystery/generated/instance-1.pddl",
+      "problem_type": "mystery",
+      "problem_path": "instances\\blocksworld\\mystery\\generated\\instance-1.pddl",
+      "domain_path": "instances\\blocksworld\\mystery\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "zero",
+          "flaw_order": "mrv",
+          "solved": false,
+          "timeout_reached": true,
+          "plan_length": null,
+          "nodes_visited": 15001,
+          "nodes_expanded": 15001,
+          "duplicates_pruned": 0,
+          "wall_time_seconds": 121.3236387000652,
+          "plan_signatures": []
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "zero",
+          "flaw_order": "priority",
+          "solved": false,
+          "timeout_reached": true,
+          "plan_length": null,
+          "nodes_visited": 23498,
+          "nodes_expanded": 23498,
+          "duplicates_pruned": 258,
+          "wall_time_seconds": 123.01245829998516,
+          "plan_signatures": []
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "mrv",
+          "solved": false,
+          "timeout_reached": true,
+          "plan_length": null,
+          "nodes_visited": 13975,
+          "nodes_expanded": 13975,
+          "duplicates_pruned": 0,
+          "wall_time_seconds": 123.14154569990933,
+          "plan_signatures": []
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 14,
+          "nodes_visited": 9929,
+          "nodes_expanded": 9928,
+          "duplicates_pruned": 56,
+          "wall_time_seconds": 17.1021625000285,
+          "plan_signatures": [
+            "feast(j, f)",
+            "overcome(j, f)",
+            "feast(g, d)",
+            "feast(f, i)",
+            "overcome(g, d)",
+            "overcome(f, i)",
+            "feast(d, b)",
+            "feast(i, g)",
+            "overcome(d, b)",
+            "overcome(i, g)",
+            "feast(b, h)",
+            "overcome(b, h)",
+            "feast(h, l)",
+            "overcome(h, l)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "relaxed_plan",
+          "flaw_order": "mrv",
+          "solved": false,
+          "timeout_reached": true,
+          "plan_length": null,
+          "nodes_visited": 13720,
+          "nodes_expanded": 13720,
+          "duplicates_pruned": 0,
+          "wall_time_seconds": 121.4123257000465,
+          "plan_signatures": []
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "relaxed_plan",
+          "flaw_order": "priority",
+          "solved": false,
+          "timeout_reached": true,
+          "plan_length": null,
+          "nodes_visited": 42176,
+          "nodes_expanded": 42176,
+          "duplicates_pruned": 259,
+          "wall_time_seconds": 122.9888801999623,
+          "plan_signatures": []
+        }
+      ]
+    },
+    {
+      "case_label": "mystery/generated_basic/instance-1.pddl",
+      "problem_type": "mystery",
+      "problem_path": "instances\\blocksworld\\mystery\\generated_basic\\instance-1.pddl",
+      "domain_path": "instances\\blocksworld\\mystery\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "zero",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 50,
+          "nodes_expanded": 49,
+          "duplicates_pruned": 11,
+          "wall_time_seconds": 0.1354142000200227,
+          "plan_signatures": [
+            "succumb(c)",
+            "feast(c, b)",
+            "overcome(c, b)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "zero",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 214,
+          "nodes_expanded": 213,
+          "duplicates_pruned": 32,
+          "wall_time_seconds": 0.41338380007073283,
+          "plan_signatures": [
+            "succumb(c)",
+            "feast(c, b)",
+            "overcome(c, b)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 6,
+          "nodes_expanded": 5,
+          "duplicates_pruned": 1,
+          "wall_time_seconds": 0.010313599952496588,
+          "plan_signatures": [
+            "succumb(c)",
+            "feast(c, b)",
+            "overcome(c, b)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 7,
+          "nodes_expanded": 6,
+          "duplicates_pruned": 1,
+          "wall_time_seconds": 0.01605480001308024,
+          "plan_signatures": [
+            "succumb(c)",
+            "feast(c, b)",
+            "overcome(c, b)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "relaxed_plan",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 11,
+          "nodes_expanded": 10,
+          "duplicates_pruned": 1,
+          "wall_time_seconds": 0.018448200076818466,
+          "plan_signatures": [
+            "succumb(c)",
+            "feast(c, b)",
+            "overcome(c, b)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "relaxed_plan",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 19,
+          "nodes_expanded": 18,
+          "duplicates_pruned": 2,
+          "wall_time_seconds": 0.033048199955374,
+          "plan_signatures": [
+            "succumb(c)",
+            "feast(c, b)",
+            "overcome(c, b)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "mystery/generated_basic_3/instance-1.pddl",
+      "problem_type": "mystery",
+      "problem_path": "instances\\blocksworld\\mystery\\generated_basic_3\\instance-1.pddl",
+      "domain_path": "instances\\blocksworld\\mystery\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "zero",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 4,
+          "nodes_visited": 169,
+          "nodes_expanded": 168,
+          "duplicates_pruned": 28,
+          "wall_time_seconds": 0.25908810005057603,
+          "plan_signatures": [
+            "feast(c, a)",
+            "feast(a, b)",
+            "overcome(a, b)",
+            "overcome(c, a)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "zero",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 4,
+          "nodes_visited": 545,
+          "nodes_expanded": 544,
+          "duplicates_pruned": 104,
+          "wall_time_seconds": 3.2329371999949217,
+          "plan_signatures": [
+            "feast(c, b)",
+            "feast(a, b)",
+            "overcome(a, b)",
+            "overcome(c, a)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 4,
+          "nodes_visited": 22,
+          "nodes_expanded": 21,
+          "duplicates_pruned": 4,
+          "wall_time_seconds": 0.03772930009290576,
+          "plan_signatures": [
+            "feast(c, a)",
+            "feast(a, b)",
+            "overcome(a, b)",
+            "overcome(c, a)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 6,
+          "nodes_visited": 51,
+          "nodes_expanded": 50,
+          "duplicates_pruned": 2,
+          "wall_time_seconds": 0.060917100054211915,
+          "plan_signatures": [
+            "feast(b, a)",
+            "overcome(b, c)",
+            "feast(a, b)",
+            "overcome(a, b)",
+            "feast(c, a)",
+            "overcome(c, a)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "relaxed_plan",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 4,
+          "nodes_visited": 22,
+          "nodes_expanded": 21,
+          "duplicates_pruned": 4,
+          "wall_time_seconds": 0.027940500061959028,
+          "plan_signatures": [
+            "feast(c, a)",
+            "feast(a, b)",
+            "overcome(a, b)",
+            "overcome(c, a)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "relaxed_plan",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 4,
+          "nodes_visited": 76,
+          "nodes_expanded": 75,
+          "duplicates_pruned": 9,
+          "wall_time_seconds": 0.08566219999920577,
+          "plan_signatures": [
+            "feast(a, b)",
+            "feast(c, a)",
+            "overcome(a, b)",
+            "overcome(c, a)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "mystery/generated/instance-2.pddl",
+      "problem_type": "mystery",
+      "problem_path": "instances\\blocksworld\\mystery\\generated\\instance-2.pddl",
+      "domain_path": "instances\\blocksworld\\mystery\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "zero",
+          "flaw_order": "mrv",
+          "solved": false,
+          "timeout_reached": true,
+          "plan_length": null,
+          "nodes_visited": 17437,
+          "nodes_expanded": 17437,
+          "duplicates_pruned": 3693,
+          "wall_time_seconds": 121.97581760003231,
+          "plan_signatures": []
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "zero",
+          "flaw_order": "priority",
+          "solved": false,
+          "timeout_reached": true,
+          "plan_length": null,
+          "nodes_visited": 26675,
+          "nodes_expanded": 26675,
+          "duplicates_pruned": 467,
+          "wall_time_seconds": 123.1217292000074,
+          "plan_signatures": []
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 12,
+          "nodes_visited": 3943,
+          "nodes_expanded": 3942,
+          "duplicates_pruned": 185,
+          "wall_time_seconds": 20.066524700028822,
+          "plan_signatures": [
+            "feast(a, b)",
+            "feast(j, g)",
+            "feast(h, i)",
+            "overcome(h, i)",
+            "feast(b, k)",
+            "feast(k, h)",
+            "overcome(k, h)",
+            "feast(g, a)",
+            "overcome(b, k)",
+            "overcome(a, b)",
+            "overcome(g, a)",
+            "overcome(j, g)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "priority",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 12,
+          "nodes_visited": 2567,
+          "nodes_expanded": 2566,
+          "duplicates_pruned": 41,
+          "wall_time_seconds": 9.230552699998952,
+          "plan_signatures": [
+            "feast(j, g)",
+            "overcome(j, g)",
+            "feast(g, a)",
+            "overcome(g, a)",
+            "feast(a, b)",
+            "overcome(a, b)",
+            "feast(b, k)",
+            "overcome(b, k)",
+            "feast(h, i)",
+            "overcome(h, i)",
+            "feast(k, h)",
+            "overcome(k, h)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "relaxed_plan",
+          "flaw_order": "mrv",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 12,
+          "nodes_visited": 4280,
+          "nodes_expanded": 4279,
+          "duplicates_pruned": 441,
+          "wall_time_seconds": 26.137445400003344,
+          "plan_signatures": [
+            "feast(a, b)",
+            "feast(h, i)",
+            "overcome(h, i)",
+            "feast(b, k)",
+            "feast(k, h)",
+            "overcome(k, h)",
+            "feast(g, a)",
+            "overcome(b, k)",
+            "overcome(a, b)",
+            "overcome(g, a)",
+            "feast(j, g)",
+            "overcome(j, g)"
+          ]
+        },
+        {
+          "strategy": "best_first",
+          "heuristic": "relaxed_plan",
+          "flaw_order": "priority",
+          "solved": false,
+          "timeout_reached": true,
+          "plan_length": null,
+          "nodes_visited": 56828,
+          "nodes_expanded": 56828,
+          "duplicates_pruned": 896,
+          "wall_time_seconds": 122.80515370005742,
+          "plan_signatures": []
+        }
+      ]
+    }
+  ]
+}
