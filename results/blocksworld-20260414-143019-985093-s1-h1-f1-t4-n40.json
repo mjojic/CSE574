@@ -1,0 +1,1226 @@
+{
+  "run_timestamp_local": "2026-04-14T14:30:19",
+  "all_passed": true,
+  "configuration": {
+    "timeout_seconds": 120.0,
+    "strategies": [
+      "best_first"
+    ],
+    "heuristics": [
+      "goal_count"
+    ],
+    "flaw_orders": [
+      "zlifo"
+    ],
+    "problem_types": [
+      "generated",
+      "generated_basic",
+      "generated_basic_3",
+      "mystery"
+    ],
+    "max_per_type": 10,
+    "per_type_limits": {},
+    "total_cases": 40
+  },
+  "summary": [
+    {
+      "strategy": "best_first",
+      "heuristic": "goal_count",
+      "flaw_order": "zlifo",
+      "total_instances": 40,
+      "solved": 40,
+      "timeouts": 0,
+      "solve_rate_pct": 100.0,
+      "avg_time_solved_s": 0.1856,
+      "avg_nodes_visited_solved": 45.4,
+      "avg_plan_length_solved": 6.62
+    }
+  ],
+  "cases": [
+    {
+      "case_label": "generated/instance-1.pddl",
+      "problem_type": "generated",
+      "problem_path": "instances\\blocksworld\\generated\\instance-1.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "zlifo",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 14,
+          "nodes_visited": 113,
+          "nodes_expanded": 112,
+          "duplicates_pruned": 8,
+          "wall_time_seconds": 0.44871319993399084,
+          "plan_signatures": [
+            "unstack(i, g)",
+            "unstack(g, d)",
+            "unstack(d, b)",
+            "unstack(b, h)",
+            "unstack(f, i)",
+            "unstack(j, f)",
+            "stack(d, b)",
+            "stack(g, d)",
+            "stack(i, g)",
+            "unstack(h, l)",
+            "stack(f, i)",
+            "stack(h, l)",
+            "stack(j, f)",
+            "stack(b, h)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "generated/instance-2.pddl",
+      "problem_type": "generated",
+      "problem_path": "instances\\blocksworld\\generated\\instance-2.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "zlifo",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 12,
+          "nodes_visited": 79,
+          "nodes_expanded": 78,
+          "duplicates_pruned": 7,
+          "wall_time_seconds": 0.25071700010448694,
+          "plan_signatures": [
+            "unstack(g, a)",
+            "unstack(j, g)",
+            "unstack(b, k)",
+            "stack(g, a)",
+            "stack(b, k)",
+            "unstack(a, b)",
+            "stack(j, g)",
+            "unstack(k, h)",
+            "stack(a, b)",
+            "stack(k, h)",
+            "unstack(h, i)",
+            "stack(h, i)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "generated/instance-3.pddl",
+      "problem_type": "generated",
+      "problem_path": "instances\\blocksworld\\generated\\instance-3.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "zlifo",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 10,
+          "nodes_visited": 83,
+          "nodes_expanded": 82,
+          "duplicates_pruned": 6,
+          "wall_time_seconds": 0.23041429999284446,
+          "plan_signatures": [
+            "unstack(f, k)",
+            "unstack(j, a)",
+            "unstack(k, c)",
+            "stack(j, a)",
+            "unstack(c, i)",
+            "stack(c, i)",
+            "unstack(a, f)",
+            "stack(k, c)",
+            "stack(f, k)",
+            "stack(a, f)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "generated/instance-4.pddl",
+      "problem_type": "generated",
+      "problem_path": "instances\\blocksworld\\generated\\instance-4.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "zlifo",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 6,
+          "nodes_visited": 39,
+          "nodes_expanded": 38,
+          "duplicates_pruned": 3,
+          "wall_time_seconds": 0.048550300067290664,
+          "plan_signatures": [
+            "unstack(j, f)",
+            "stack(j, f)",
+            "unstack(g, j)",
+            "unstack(f, b)",
+            "stack(g, j)",
+            "stack(f, b)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "generated/instance-5.pddl",
+      "problem_type": "generated",
+      "problem_path": "instances\\blocksworld\\generated\\instance-5.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "zlifo",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 18,
+          "nodes_visited": 162,
+          "nodes_expanded": 161,
+          "duplicates_pruned": 17,
+          "wall_time_seconds": 0.9677447001449764,
+          "plan_signatures": [
+            "unstack(g, l)",
+            "unstack(j, b)",
+            "unstack(b, i)",
+            "unstack(l, j)",
+            "unstack(f, g)",
+            "unstack(i, h)",
+            "stack(i, h)",
+            "unstack(d, c)",
+            "stack(b, i)",
+            "stack(d, c)",
+            "unstack(h, d)",
+            "stack(j, b)",
+            "unstack(c, k)",
+            "stack(h, d)",
+            "stack(l, j)",
+            "stack(c, k)",
+            "stack(g, l)",
+            "stack(f, g)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "generated/instance-6.pddl",
+      "problem_type": "generated",
+      "problem_path": "instances\\blocksworld\\generated\\instance-6.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "zlifo",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 22,
+          "nodes_visited": 321,
+          "nodes_expanded": 320,
+          "duplicates_pruned": 17,
+          "wall_time_seconds": 2.5001018999610096,
+          "plan_signatures": [
+            "unstack(i, k)",
+            "unstack(a, f)",
+            "unstack(f, b)",
+            "unstack(b, d)",
+            "unstack(h, e)",
+            "unstack(g, a)",
+            "unstack(c, i)",
+            "unstack(e, j)",
+            "stack(b, d)",
+            "unstack(j, g)",
+            "stack(f, b)",
+            "stack(j, g)",
+            "stack(a, f)",
+            "stack(e, j)",
+            "stack(g, a)",
+            "stack(h, e)",
+            "unstack(k, l)",
+            "stack(k, l)",
+            "unstack(l, h)",
+            "stack(i, k)",
+            "stack(l, h)",
+            "stack(c, i)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "generated/instance-7.pddl",
+      "problem_type": "generated",
+      "problem_path": "instances\\blocksworld\\generated\\instance-7.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "zlifo",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 6,
+          "nodes_visited": 24,
+          "nodes_expanded": 23,
+          "duplicates_pruned": 3,
+          "wall_time_seconds": 0.036384099861606956,
+          "plan_signatures": [
+            "unstack(e, d)",
+            "stack(e, d)",
+            "unstack(g, e)",
+            "unstack(d, j)",
+            "stack(g, e)",
+            "stack(d, j)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "generated/instance-8.pddl",
+      "problem_type": "generated",
+      "problem_path": "instances\\blocksworld\\generated\\instance-8.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "zlifo",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 12,
+          "nodes_visited": 75,
+          "nodes_expanded": 74,
+          "duplicates_pruned": 12,
+          "wall_time_seconds": 0.3187865000218153,
+          "plan_signatures": [
+            "unstack(f, i)",
+            "unstack(i, a)",
+            "unstack(j, e)",
+            "unstack(e, h)",
+            "stack(i, a)",
+            "stack(e, h)",
+            "stack(f, i)",
+            "stack(j, e)",
+            "unstack(d, f)",
+            "unstack(h, d)",
+            "stack(d, f)",
+            "stack(h, d)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "generated/instance-9.pddl",
+      "problem_type": "generated",
+      "problem_path": "instances\\blocksworld\\generated\\instance-9.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "zlifo",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 18,
+          "nodes_visited": 128,
+          "nodes_expanded": 127,
+          "duplicates_pruned": 12,
+          "wall_time_seconds": 0.9317709999158978,
+          "plan_signatures": [
+            "unstack(d, e)",
+            "unstack(g, k)",
+            "unstack(l, g)",
+            "unstack(k, a)",
+            "unstack(a, d)",
+            "unstack(c, l)",
+            "stack(d, e)",
+            "unstack(j, c)",
+            "stack(a, d)",
+            "stack(j, c)",
+            "unstack(b, f)",
+            "stack(k, a)",
+            "stack(b, f)",
+            "stack(g, k)",
+            "unstack(f, j)",
+            "stack(l, g)",
+            "stack(f, j)",
+            "stack(c, l)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "generated/instance-10.pddl",
+      "problem_type": "generated",
+      "problem_path": "instances\\blocksworld\\generated\\instance-10.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "zlifo",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 8,
+          "nodes_visited": 31,
+          "nodes_expanded": 30,
+          "duplicates_pruned": 4,
+          "wall_time_seconds": 0.07122919987887144,
+          "plan_signatures": [
+            "unstack(d, e)",
+            "stack(d, e)",
+            "unstack(a, b)",
+            "unstack(e, a)",
+            "stack(a, b)",
+            "stack(e, a)",
+            "unstack(b, f)",
+            "stack(b, f)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "generated_basic/instance-1.pddl",
+      "problem_type": "generated_basic",
+      "problem_path": "instances\\blocksworld\\generated_basic\\instance-1.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "zlifo",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 7,
+          "nodes_expanded": 6,
+          "duplicates_pruned": 1,
+          "wall_time_seconds": 0.01494950009509921,
+          "plan_signatures": [
+            "put-down(c)",
+            "unstack(c, b)",
+            "stack(c, b)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "generated_basic/instance-2.pddl",
+      "problem_type": "generated_basic",
+      "problem_path": "instances\\blocksworld\\generated_basic\\instance-2.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "zlifo",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 6,
+          "nodes_expanded": 5,
+          "duplicates_pruned": 1,
+          "wall_time_seconds": 0.009344100020825863,
+          "plan_signatures": [
+            "put-down(c)",
+            "unstack(c, a)",
+            "stack(c, a)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "generated_basic/instance-3.pddl",
+      "problem_type": "generated_basic",
+      "problem_path": "instances\\blocksworld\\generated_basic\\instance-3.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "zlifo",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 2,
+          "nodes_visited": 14,
+          "nodes_expanded": 13,
+          "duplicates_pruned": 0,
+          "wall_time_seconds": 0.019015199970453978,
+          "plan_signatures": [
+            "unstack(a, c)",
+            "stack(a, c)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "generated_basic/instance-4.pddl",
+      "problem_type": "generated_basic",
+      "problem_path": "instances\\blocksworld\\generated_basic\\instance-4.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "zlifo",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 5,
+          "nodes_visited": 20,
+          "nodes_expanded": 19,
+          "duplicates_pruned": 1,
+          "wall_time_seconds": 0.02525399997830391,
+          "plan_signatures": [
+            "unstack(d, b)",
+            "put-down(a)",
+            "stack(d, b)",
+            "unstack(a, d)",
+            "stack(a, d)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "generated_basic/instance-5.pddl",
+      "problem_type": "generated_basic",
+      "problem_path": "instances\\blocksworld\\generated_basic\\instance-5.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "zlifo",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 2,
+          "nodes_visited": 8,
+          "nodes_expanded": 7,
+          "duplicates_pruned": 0,
+          "wall_time_seconds": 0.010074200108647346,
+          "plan_signatures": [
+            "unstack(d, c)",
+            "stack(d, c)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "generated_basic/instance-6.pddl",
+      "problem_type": "generated_basic",
+      "problem_path": "instances\\blocksworld\\generated_basic\\instance-6.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "zlifo",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 4,
+          "nodes_visited": 26,
+          "nodes_expanded": 25,
+          "duplicates_pruned": 1,
+          "wall_time_seconds": 0.0407990999519825,
+          "plan_signatures": [
+            "unstack(d, c)",
+            "stack(d, c)",
+            "unstack(a, b)",
+            "stack(a, b)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "generated_basic/instance-7.pddl",
+      "problem_type": "generated_basic",
+      "problem_path": "instances\\blocksworld\\generated_basic\\instance-7.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "zlifo",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 2,
+          "nodes_visited": 11,
+          "nodes_expanded": 10,
+          "duplicates_pruned": 0,
+          "wall_time_seconds": 0.016627400182187557,
+          "plan_signatures": [
+            "unstack(a, c)",
+            "stack(a, c)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "generated_basic/instance-8.pddl",
+      "problem_type": "generated_basic",
+      "problem_path": "instances\\blocksworld\\generated_basic\\instance-8.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "zlifo",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 6,
+          "nodes_visited": 35,
+          "nodes_expanded": 34,
+          "duplicates_pruned": 2,
+          "wall_time_seconds": 0.048301600152626634,
+          "plan_signatures": [
+            "unstack(d, c)",
+            "stack(d, c)",
+            "unstack(a, b)",
+            "stack(a, b)",
+            "unstack(b, d)",
+            "stack(b, d)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "generated_basic/instance-9.pddl",
+      "problem_type": "generated_basic",
+      "problem_path": "instances\\blocksworld\\generated_basic\\instance-9.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "zlifo",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 7,
+          "nodes_visited": 22,
+          "nodes_expanded": 21,
+          "duplicates_pruned": 4,
+          "wall_time_seconds": 0.0379377999342978,
+          "plan_signatures": [
+            "put-down(d)",
+            "unstack(a, c)",
+            "unstack(b, a)",
+            "stack(a, c)",
+            "stack(b, a)",
+            "unstack(d, b)",
+            "stack(d, b)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "generated_basic/instance-10.pddl",
+      "problem_type": "generated_basic",
+      "problem_path": "instances\\blocksworld\\generated_basic\\instance-10.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "zlifo",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 6,
+          "nodes_visited": 20,
+          "nodes_expanded": 19,
+          "duplicates_pruned": 2,
+          "wall_time_seconds": 0.03437180002219975,
+          "plan_signatures": [
+            "put-down(b)",
+            "put-down(a)",
+            "unstack(a, d)",
+            "stack(a, d)",
+            "unstack(b, c)",
+            "stack(b, c)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "generated_basic_3/instance-1.pddl",
+      "problem_type": "generated_basic_3",
+      "problem_path": "instances\\blocksworld\\generated_basic_3\\instance-1.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "zlifo",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 4,
+          "nodes_visited": 14,
+          "nodes_expanded": 13,
+          "duplicates_pruned": 2,
+          "wall_time_seconds": 0.0183230999391526,
+          "plan_signatures": [
+            "unstack(c, a)",
+            "stack(c, a)",
+            "unstack(a, b)",
+            "stack(a, b)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "generated_basic_3/instance-2.pddl",
+      "problem_type": "generated_basic_3",
+      "problem_path": "instances\\blocksworld\\generated_basic_3\\instance-2.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "zlifo",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 4,
+          "nodes_visited": 12,
+          "nodes_expanded": 11,
+          "duplicates_pruned": 1,
+          "wall_time_seconds": 0.014940200140699744,
+          "plan_signatures": [
+            "unstack(a, c)",
+            "stack(a, c)",
+            "unstack(b, a)",
+            "stack(b, a)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "generated_basic_3/instance-3.pddl",
+      "problem_type": "generated_basic_3",
+      "problem_path": "instances\\blocksworld\\generated_basic_3\\instance-3.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "zlifo",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 5,
+          "nodes_visited": 11,
+          "nodes_expanded": 10,
+          "duplicates_pruned": 3,
+          "wall_time_seconds": 0.014241299824789166,
+          "plan_signatures": [
+            "put-down(c)",
+            "unstack(b, a)",
+            "stack(b, a)",
+            "unstack(c, b)",
+            "stack(c, b)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "generated_basic_3/instance-4.pddl",
+      "problem_type": "generated_basic_3",
+      "problem_path": "instances\\blocksworld\\generated_basic_3\\instance-4.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "zlifo",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 7,
+          "nodes_expanded": 6,
+          "duplicates_pruned": 1,
+          "wall_time_seconds": 0.0069558999966830015,
+          "plan_signatures": [
+            "put-down(b)",
+            "unstack(b, a)",
+            "stack(b, a)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "generated_basic_3/instance-5.pddl",
+      "problem_type": "generated_basic_3",
+      "problem_path": "instances\\blocksworld\\generated_basic_3\\instance-5.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "zlifo",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 7,
+          "nodes_expanded": 6,
+          "duplicates_pruned": 1,
+          "wall_time_seconds": 0.0074970000423491,
+          "plan_signatures": [
+            "put-down(c)",
+            "unstack(c, a)",
+            "stack(c, a)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "generated_basic_3/instance-6.pddl",
+      "problem_type": "generated_basic_3",
+      "problem_path": "instances\\blocksworld\\generated_basic_3\\instance-6.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "zlifo",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 5,
+          "nodes_visited": 25,
+          "nodes_expanded": 24,
+          "duplicates_pruned": 1,
+          "wall_time_seconds": 0.027327100047841668,
+          "plan_signatures": [
+            "unstack(c, a)",
+            "put-down(b)",
+            "stack(c, a)",
+            "unstack(b, c)",
+            "stack(b, c)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "generated_basic_3/instance-7.pddl",
+      "problem_type": "generated_basic_3",
+      "problem_path": "instances\\blocksworld\\generated_basic_3\\instance-7.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "zlifo",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 4,
+          "nodes_visited": 13,
+          "nodes_expanded": 12,
+          "duplicates_pruned": 2,
+          "wall_time_seconds": 0.0175329998601228,
+          "plan_signatures": [
+            "unstack(b, c)",
+            "stack(b, c)",
+            "unstack(a, b)",
+            "stack(a, b)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "generated_basic_3/instance-8.pddl",
+      "problem_type": "generated_basic_3",
+      "problem_path": "instances\\blocksworld\\generated_basic_3\\instance-8.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "zlifo",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 2,
+          "nodes_visited": 6,
+          "nodes_expanded": 5,
+          "duplicates_pruned": 0,
+          "wall_time_seconds": 0.006268400000408292,
+          "plan_signatures": [
+            "unstack(a, c)",
+            "stack(a, c)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "generated_basic_3/instance-9.pddl",
+      "problem_type": "generated_basic_3",
+      "problem_path": "instances\\blocksworld\\generated_basic_3\\instance-9.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "zlifo",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 6,
+          "nodes_expanded": 5,
+          "duplicates_pruned": 1,
+          "wall_time_seconds": 0.006920400075614452,
+          "plan_signatures": [
+            "put-down(c)",
+            "unstack(c, a)",
+            "stack(c, a)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "generated_basic_3/instance-10.pddl",
+      "problem_type": "generated_basic_3",
+      "problem_path": "instances\\blocksworld\\generated_basic_3\\instance-10.pddl",
+      "domain_path": "instances\\blocksworld\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "zlifo",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 4,
+          "nodes_visited": 20,
+          "nodes_expanded": 19,
+          "duplicates_pruned": 1,
+          "wall_time_seconds": 0.019927499815821648,
+          "plan_signatures": [
+            "unstack(c, b)",
+            "stack(c, b)",
+            "unstack(a, c)",
+            "stack(a, c)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "mystery/generated_basic/instance-0.pddl",
+      "problem_type": "mystery",
+      "problem_path": "instances\\blocksworld\\mystery\\generated_basic\\instance-0.pddl",
+      "domain_path": "instances\\blocksworld\\mystery\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "zlifo",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 5,
+          "nodes_visited": 28,
+          "nodes_expanded": 27,
+          "duplicates_pruned": 1,
+          "wall_time_seconds": 0.03800100018270314,
+          "plan_signatures": [
+            "feast(b, c)",
+            "succumb(d)",
+            "overcome(b, c)",
+            "feast(d, b)",
+            "overcome(d, b)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "mystery/generated/instance-1.pddl",
+      "problem_type": "mystery",
+      "problem_path": "instances\\blocksworld\\mystery\\generated\\instance-1.pddl",
+      "domain_path": "instances\\blocksworld\\mystery\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "zlifo",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 14,
+          "nodes_visited": 161,
+          "nodes_expanded": 160,
+          "duplicates_pruned": 8,
+          "wall_time_seconds": 0.5113157001323998,
+          "plan_signatures": [
+            "feast(j, f)",
+            "overcome(j, f)",
+            "feast(i, g)",
+            "feast(b, h)",
+            "feast(h, l)",
+            "feast(f, i)",
+            "overcome(i, g)",
+            "overcome(h, l)",
+            "overcome(f, i)",
+            "feast(g, d)",
+            "overcome(b, h)",
+            "overcome(g, d)",
+            "feast(d, b)",
+            "overcome(d, b)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "mystery/generated_basic/instance-1.pddl",
+      "problem_type": "mystery",
+      "problem_path": "instances\\blocksworld\\mystery\\generated_basic\\instance-1.pddl",
+      "domain_path": "instances\\blocksworld\\mystery\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "zlifo",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 7,
+          "nodes_expanded": 6,
+          "duplicates_pruned": 1,
+          "wall_time_seconds": 0.009822699939832091,
+          "plan_signatures": [
+            "succumb(c)",
+            "feast(c, b)",
+            "overcome(c, b)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "mystery/generated_basic_3/instance-1.pddl",
+      "problem_type": "mystery",
+      "problem_path": "instances\\blocksworld\\mystery\\generated_basic_3\\instance-1.pddl",
+      "domain_path": "instances\\blocksworld\\mystery\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "zlifo",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 4,
+          "nodes_visited": 12,
+          "nodes_expanded": 11,
+          "duplicates_pruned": 1,
+          "wall_time_seconds": 0.013266399968415499,
+          "plan_signatures": [
+            "feast(c, a)",
+            "feast(a, b)",
+            "overcome(a, b)",
+            "overcome(c, a)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "mystery/generated/instance-2.pddl",
+      "problem_type": "mystery",
+      "problem_path": "instances\\blocksworld\\mystery\\generated\\instance-2.pddl",
+      "domain_path": "instances\\blocksworld\\mystery\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "zlifo",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 12,
+          "nodes_visited": 74,
+          "nodes_expanded": 73,
+          "duplicates_pruned": 8,
+          "wall_time_seconds": 0.24342920002527535,
+          "plan_signatures": [
+            "feast(g, a)",
+            "feast(k, h)",
+            "feast(b, k)",
+            "feast(j, g)",
+            "overcome(g, a)",
+            "feast(h, i)",
+            "overcome(j, g)",
+            "overcome(h, i)",
+            "feast(a, b)",
+            "overcome(k, h)",
+            "overcome(a, b)",
+            "overcome(b, k)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "mystery/generated_basic/instance-2.pddl",
+      "problem_type": "mystery",
+      "problem_path": "instances\\blocksworld\\mystery\\generated_basic\\instance-2.pddl",
+      "domain_path": "instances\\blocksworld\\mystery\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "zlifo",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 3,
+          "nodes_visited": 7,
+          "nodes_expanded": 6,
+          "duplicates_pruned": 0,
+          "wall_time_seconds": 0.009658100083470345,
+          "plan_signatures": [
+            "succumb(c)",
+            "feast(c, a)",
+            "overcome(c, a)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "mystery/generated_basic_3/instance-2.pddl",
+      "problem_type": "mystery",
+      "problem_path": "instances\\blocksworld\\mystery\\generated_basic_3\\instance-2.pddl",
+      "domain_path": "instances\\blocksworld\\mystery\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "zlifo",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 4,
+          "nodes_visited": 14,
+          "nodes_expanded": 13,
+          "duplicates_pruned": 1,
+          "wall_time_seconds": 0.014966099988669157,
+          "plan_signatures": [
+            "feast(a, c)",
+            "overcome(a, c)",
+            "feast(b, a)",
+            "overcome(b, a)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "mystery/generated/instance-3.pddl",
+      "problem_type": "mystery",
+      "problem_path": "instances\\blocksworld\\mystery\\generated\\instance-3.pddl",
+      "domain_path": "instances\\blocksworld\\mystery\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "zlifo",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 10,
+          "nodes_visited": 140,
+          "nodes_expanded": 139,
+          "duplicates_pruned": 7,
+          "wall_time_seconds": 0.3522188002243638,
+          "plan_signatures": [
+            "feast(k, c)",
+            "feast(j, a)",
+            "feast(c, i)",
+            "overcome(c, i)",
+            "overcome(k, c)",
+            "feast(a, f)",
+            "overcome(a, f)",
+            "overcome(j, a)",
+            "feast(f, k)",
+            "overcome(f, k)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "mystery/generated_basic/instance-3.pddl",
+      "problem_type": "mystery",
+      "problem_path": "instances\\blocksworld\\mystery\\generated_basic\\instance-3.pddl",
+      "domain_path": "instances\\blocksworld\\mystery\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "zlifo",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 2,
+          "nodes_visited": 12,
+          "nodes_expanded": 11,
+          "duplicates_pruned": 0,
+          "wall_time_seconds": 0.015520399902015924,
+          "plan_signatures": [
+            "feast(a, c)",
+            "overcome(a, c)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_label": "mystery/generated_basic_3/instance-3.pddl",
+      "problem_type": "mystery",
+      "problem_path": "instances\\blocksworld\\mystery\\generated_basic_3\\instance-3.pddl",
+      "domain_path": "instances\\blocksworld\\mystery\\generated_domain.pddl",
+      "any_solved": true,
+      "runs": [
+        {
+          "strategy": "best_first",
+          "heuristic": "goal_count",
+          "flaw_order": "zlifo",
+          "solved": true,
+          "timeout_reached": false,
+          "plan_length": 5,
+          "nodes_visited": 14,
+          "nodes_expanded": 13,
+          "duplicates_pruned": 3,
+          "wall_time_seconds": 0.016212699934840202,
+          "plan_signatures": [
+            "feast(b, a)",
+            "overcome(b, a)",
+            "succumb(c)",
+            "feast(c, b)",
+            "overcome(c, b)"
+          ]
+        }
+      ]
+    }
+  ]
+}
