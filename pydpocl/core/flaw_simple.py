@@ -71,6 +71,7 @@ class OpenConditionFlaw(Identifiable):
     condition: Literal
     priority: float = field(default=0.0, compare=False)
     level: int = field(default=0, compare=False)
+    age: int = field(default=0, compare=False)
     _id: UUID | None = field(default=None, compare=False)
 
     def __post_init__(self) -> None:
@@ -139,12 +140,14 @@ def create_open_condition_flaw(
     step: Step,
     condition: Literal,
     level: int = 0,
+    age: int = 0,
 ) -> OpenConditionFlaw:
     """Create an open condition flaw with computed priority."""
     flaw = OpenConditionFlaw(
         step=step,
         condition=condition,
         level=level,
+        age=age,
     )
 
     # Set priority based on computation

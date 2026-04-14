@@ -39,7 +39,7 @@ RESULTS_DIR = Path("results")
 
 STRATEGIES = ("best_first", "breadth_first", "depth_first")
 HEURISTICS = ("zero", "goal_count", "relaxed_plan")
-FLAW_ORDERS = ("mrv", "priority")
+FLAW_ORDERS = ("lcfr", "zlifo", "priority")
 
 
 @dataclass(frozen=True, slots=True)

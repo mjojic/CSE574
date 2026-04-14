@@ -76,11 +76,11 @@ def count_resolution_options(
     return n
 
 
-def select_flaw_least_branching(
+def select_flaw_lcfr(
     plan: Plan,
     problem: PlanningProblem,
 ) -> OpenConditionFlaw | None:
-    """Prefer flaws with the fewest possible resolvers (fail-first / MRV)."""
+    """LCFR: pick the flaw with the fewest possible resolvers (fail-first)."""
     if not plan.flaws:
         return None
     scored: list[tuple[int, str, str, OpenConditionFlaw]] = []
@@ -89,6 +89,43 @@ def select_flaw_least_branching(
         scored.append((c, f.step.signature, f.condition.signature, f))
     scored.sort(key=lambda x: (x[0], x[1], x[2]))
     return scored[0][3]
+
+
+def select_flaw_zlifo(
+    plan: Plan,
+    problem: PlanningProblem,
+) -> OpenConditionFlaw | None:
+    """ZLIFO: forced open conditions first (LIFO tiebreak), then unforced LIFO.
+
+    Priority cascade (ground-STRIPS simplification of Pollack et al. 1997):
+      1. Forced flaws (repair cost <= 1) -- cost-0 dead-ends win, else LIFO.
+      2. Unforced flaws (repair cost >= 2) -- LIFO (highest age = most recent).
+
+    Threats are handled before this function is called, so tier-1 of the
+    original ZLIFO (nonseparable-threat preference) is already satisfied by
+    the planner loop.  Separable threats do not exist in a ground STRIPS model,
+    so that tier is also omitted.
+    """
+    if not plan.flaws:
+        return None
+
+    forced: list[tuple[int, OpenConditionFlaw]] = []
+    unforced: list[OpenConditionFlaw] = []
+
+    for f in plan.flaws:
+        cost = count_resolution_options(plan, f, problem)
+        if cost <= 1:
+            forced.append((cost, f))
+        else:
+            unforced.append(f)
+
+    if forced:
+        # Cost-0 (dead-end) flaws first; within same cost, pick most recent.
+        forced.sort(key=lambda x: (x[0], -x[1].age))
+        return forced[0][1]
+
+    # All unforced: pick LIFO (highest age = most recently introduced).
+    return max(unforced, key=lambda f: f.age)
 
 
 def expand_open_condition(

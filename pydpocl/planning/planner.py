@@ -14,7 +14,8 @@ from pydpocl.planning.pocl_expansion import (
     expand_open_condition,
     find_unresolved_threats,
     resolve_threat,
-    select_flaw_least_branching,
+    select_flaw_lcfr,
+    select_flaw_zlifo,
 )
 from pydpocl.planning.plan_fingerprint import structural_fingerprint
 from pydpocl.planning.search import create_search_strategy
@@ -49,14 +50,17 @@ class DPOCLPlanner(BasePlanner[Plan, Plan]):
         heuristic: str = "zero",
         verbose: bool = False,
         dedupe_structural: bool = True,
-        flaw_order: str = "mrv",
+        flaw_order: str = "lcfr",
     ):
         self.search_strategy = search_strategy
         self.heuristic = heuristic
         self.verbose = verbose
         self.dedupe_structural = dedupe_structural
-        if flaw_order not in ("mrv", "priority"):
-            raise ValueError("flaw_order must be 'mrv' or 'priority'")
+        # Backward-compatible alias: MRV previously referred to this LCFR selector.
+        if flaw_order == "mrv":
+            flaw_order = "lcfr"
+        if flaw_order not in ("lcfr", "zlifo", "priority"):
+            raise ValueError("flaw_order must be 'lcfr', 'zlifo', or 'priority'")
         self.flaw_order = flaw_order
         self.statistics = PlanningStatistics()
 
@@ -128,8 +132,10 @@ class DPOCLPlanner(BasePlanner[Plan, Plan]):
                 continue
 
             # --- open-condition expansion ---
-            if self.flaw_order == "mrv":
-                flaw = select_flaw_least_branching(plan, problem)
+            if self.flaw_order == "lcfr":
+                flaw = select_flaw_lcfr(plan, problem)
+            elif self.flaw_order == "zlifo":
+                flaw = select_flaw_zlifo(plan, problem)
             else:
                 flaw = plan.select_flaw()
             if flaw is None:

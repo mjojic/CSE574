@@ -49,6 +49,8 @@ class Plan(Identifiable):
     depth: int = field(default=0, compare=False)
     name: str = field(default="", compare=False)
     status: SearchStatus = field(default=SearchStatus.PENDING, compare=False)
+    # Monotonically increasing counter used to stamp flaw age for LIFO ordering.
+    _flaw_counter: int = field(default=0, compare=False)
 
     # Cached graphs for efficiency
     _ordering_graph: nx.DiGraph | None = field(default=None, init=False, compare=False)
@@ -193,18 +195,21 @@ class Plan(Identifiable):
         if orderings:
             new_orderings = new_orderings | set(orderings)
 
-        # Add flaws for any open preconditions
+        # Add flaws for any open preconditions, stamping each with a unique age.
         new_flaws = set(self.flaws)
+        counter = self._flaw_counter
         for precond in step.preconditions:
             if not self._is_condition_satisfied(precond):
-                flaw = create_open_condition_flaw(step, precond)
+                flaw = create_open_condition_flaw(step, precond, age=counter)
                 new_flaws.add(flaw)
+                counter += 1
 
         return self._copy_with(
             steps=frozenset(new_steps),
             orderings=frozenset(new_orderings),
             flaws=frozenset(new_flaws),
             cost=self.cost + 1.0,  # Simple cost increment
+            _flaw_counter=counter,
         )
 
     def add_ordering(self, before: StepId, after: StepId) -> Plan:
@@ -287,6 +292,7 @@ class Plan(Identifiable):
             "depth": self.depth,
             "name": self.name,
             "status": self.status,
+            "_flaw_counter": self._flaw_counter,
         }
 
         current_values.update(kwargs)
@@ -408,11 +414,13 @@ def create_initial_plan(
     # Add ordering: initial before goal
     orderings = frozenset([(initial_step.step_id, goal_step.step_id)])
 
-    # Create flaws for all goal conditions
+    # Create flaws for all goal conditions, stamping each with a sequential age.
     flaws = set()
+    flaw_counter = 0
     for goal_condition in goal_state:
-        flaw = create_open_condition_flaw(goal_step, goal_condition)
+        flaw = create_open_condition_flaw(goal_step, goal_condition, age=flaw_counter)
         flaws.add(flaw)
+        flaw_counter += 1
 
     return Plan(
         steps=steps,
@@ -423,6 +431,7 @@ def create_initial_plan(
         cost=0.0,
         depth=0,
         status=SearchStatus.PENDING,
+        _flaw_counter=flaw_counter,
     )
 
 
