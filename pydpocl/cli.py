@@ -10,6 +10,7 @@ from rich.table import Table
 
 from pydpocl import __version__
 from pydpocl.domain.compiler import compile_domain_and_problem
+from pydpocl.planning.llm_policy import DEFAULT_MODEL, LLMConfig
 from pydpocl.planning.planner import DPOCLPlanner
 
 console = Console()
@@ -56,6 +57,18 @@ def cli(ctx: click.Context, verbose: bool, quiet: bool) -> None:
     type=click.Choice(["zero", "goal_count", "relaxed_plan"]),
     help="Heuristic function to use"
 )
+@click.option(
+    "--llm/--no-llm", default=False,
+    help="Outsource node and flaw selection to an OpenAI model"
+)
+@click.option(
+    "--llm-model", default=None,
+    help=f"OpenAI model to use when --llm is set (default: $OPENAI_MODEL or {DEFAULT_MODEL})"
+)
+@click.option(
+    "--llm-top-k", default=10, type=int,
+    help="Number of frontier candidates exposed to the LLM per node selection"
+)
 @click.pass_context
 def solve(
     ctx: click.Context,
@@ -66,6 +79,9 @@ def solve(
     output: Path | None,
     strategy: str,
     heuristic: str,
+    llm: bool,
+    llm_model: str | None,
+    llm_top_k: int,
 ) -> None:
     """Solve a planning problem."""
     verbose = ctx.obj["verbose"]
@@ -75,7 +91,18 @@ def solve(
         if not quiet:
             console.print(f"Domain: [cyan]{domain_file}[/cyan]")
             console.print(f"Problem: [cyan]{problem_file}[/cyan]")
-            console.print(f"Strategy: [yellow]{strategy}[/yellow]")
+            if llm:
+                console.print(
+                    "Strategy: [magenta]llm[/magenta]"
+                    f" (model: [cyan]{llm_model or 'env/default'}[/cyan],"
+                    f" top_k: [cyan]{llm_top_k}[/cyan])"
+                )
+                console.print(
+                    "[yellow]Note:[/yellow] --llm overrides --strategy and"
+                    " the default flaw-selection policy."
+                )
+            else:
+                console.print(f"Strategy: [yellow]{strategy}[/yellow]")
             console.print(f"Heuristic: [yellow]{heuristic}[/yellow]")
             console.print()
 
@@ -99,10 +126,18 @@ def solve(
                 sys.exit(1)
 
         # Create planner
+        llm_config: LLMConfig | None = None
+        if llm:
+            llm_config = LLMConfig(top_k=llm_top_k)
+            if llm_model:
+                llm_config.model = llm_model
+
         planner = DPOCLPlanner(
             search_strategy=strategy,
             heuristic=heuristic,
             verbose=verbose,
+            use_llm=llm,
+            llm_config=llm_config,
         )
 
         # Solve problem

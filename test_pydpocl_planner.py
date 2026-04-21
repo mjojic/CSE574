@@ -16,6 +16,7 @@ from dataclasses import dataclass, field
 
 from pydpocl.core.literal import Literal, create_literal
 from pydpocl.core.step import GroundStep
+from pydpocl.planning.llm_policy import LLMConfig
 from pydpocl.planning.planner import DPOCLPlanner
 
 
@@ -84,6 +85,22 @@ def main() -> None:
         action="store_true",
         help="Assert that the planner returns at least one solution (fails on stub).",
     )
+    parser.add_argument(
+        "--llm",
+        action="store_true",
+        help="Outsource node and flaw selection to an OpenAI model (requires OPENAI_API_KEY).",
+    )
+    parser.add_argument(
+        "--llm-model",
+        default=None,
+        help="OpenAI model id (defaults to $OPENAI_MODEL or the LLMConfig default).",
+    )
+    parser.add_argument(
+        "--llm-top-k",
+        type=int,
+        default=10,
+        help="Number of frontier candidates to expose to the LLM per node selection.",
+    )
     args = parser.parse_args()
 
     problem = socks_and_shoes_problem()
@@ -92,10 +109,19 @@ def main() -> None:
     print(f"Operators     : {', '.join(op.signature for op in problem.operators)}")
     print()
 
+    llm_config = None
+    if args.llm:
+        llm_config = LLMConfig(top_k=args.llm_top_k)
+        if args.llm_model:
+            llm_config.model = args.llm_model
+        print(f"[INFO] LLM mode ON (model={llm_config.model}, top_k={llm_config.top_k})")
+
     planner = DPOCLPlanner(
         search_strategy="best_first",
         heuristic="zero",
         verbose=True,
+        use_llm=args.llm,
+        llm_config=llm_config,
     )
 
     solutions = list(planner.solve(problem, max_solutions=1, timeout=10.0))

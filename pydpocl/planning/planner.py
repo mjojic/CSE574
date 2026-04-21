@@ -10,6 +10,7 @@ from typing import Any
 from pydpocl.core.interfaces import BasePlanner, PlanningProblem
 from pydpocl.core.plan import Plan, create_initial_plan
 from pydpocl.planning.heuristic import create_heuristic
+from pydpocl.planning.llm_policy import LLMConfig, LLMPolicy
 from pydpocl.planning.pocl_expansion import (
     expand_open_condition,
     find_unresolved_threats,
@@ -32,6 +33,8 @@ class PlanningStatistics:
     peak_frontier_size: int = 0
     timeout_reached: bool = False
     duplicates_pruned: int = 0
+    llm_calls: int = 0
+    llm_retries: int = 0
 
 
 class DPOCLPlanner(BasePlanner[Plan, Plan]):
@@ -51,6 +54,8 @@ class DPOCLPlanner(BasePlanner[Plan, Plan]):
         verbose: bool = False,
         dedupe_structural: bool = True,
         flaw_order: str = "lcfr",
+        use_llm: bool = False,
+        llm_config: LLMConfig | None = None,
     ):
         self.search_strategy = search_strategy
         self.heuristic = heuristic
@@ -62,6 +67,8 @@ class DPOCLPlanner(BasePlanner[Plan, Plan]):
         if flaw_order not in ("lcfr", "zlifo", "priority"):
             raise ValueError("flaw_order must be 'lcfr', 'zlifo', or 'priority'")
         self.flaw_order = flaw_order
+        self.use_llm = use_llm
+        self.llm_config = llm_config or LLMConfig()
         self.statistics = PlanningStatistics()
 
     def solve(
@@ -84,14 +91,30 @@ class DPOCLPlanner(BasePlanner[Plan, Plan]):
         self.statistics = PlanningStatistics()
 
         if self.verbose:
-            print(f"Starting DPOCL planning with {self.search_strategy} search")
+            strat_label = "llm" if self.use_llm else self.search_strategy
+            print(f"Starting DPOCL planning with {strat_label} search")
             print(f"Using {self.heuristic} heuristic")
+            if self.use_llm:
+                print(
+                    f"LLM control enabled (model={self.llm_config.model},"
+                    f" top_k={self.llm_config.top_k})"
+                )
             print(f"Looking for up to {max_solutions} solutions")
             if timeout:
                 print(f"Timeout: {timeout} seconds")
 
         heuristic_fn = create_heuristic(self.heuristic)
-        frontier = create_search_strategy(self.search_strategy)
+        llm_policy: LLMPolicy | None = None
+        if self.use_llm:
+            llm_policy = LLMPolicy(self.llm_config)
+            frontier = create_search_strategy(
+                "llm",
+                policy=llm_policy,
+                problem=problem,
+                top_k=self.llm_config.top_k,
+            )
+        else:
+            frontier = create_search_strategy(self.search_strategy)
         # Structural fingerprints already enqueued or expanded — avoids revisiting
         # the same partial plan reached via different expansion orders.
         seen: set[tuple] = set()
@@ -132,7 +155,9 @@ class DPOCLPlanner(BasePlanner[Plan, Plan]):
                 continue
 
             # --- open-condition expansion ---
-            if self.flaw_order == "lcfr":
+            if self.use_llm and llm_policy is not None:
+                flaw = llm_policy.select_flaw(plan, problem)
+            elif self.flaw_order == "lcfr":
                 flaw = select_flaw_lcfr(plan, problem)
             elif self.flaw_order == "zlifo":
                 flaw = select_flaw_zlifo(plan, problem)
@@ -147,6 +172,9 @@ class DPOCLPlanner(BasePlanner[Plan, Plan]):
                 self._try_push(s, frontier, heuristic_fn, seen)
 
         self.statistics.time_elapsed = time.time() - start_time
+        if llm_policy is not None:
+            self.statistics.llm_calls = llm_policy.calls
+            self.statistics.llm_retries = llm_policy.retries
 
     # ------------------------------------------------------------------
 
@@ -182,4 +210,6 @@ class DPOCLPlanner(BasePlanner[Plan, Plan]):
             "peak_frontier_size": self.statistics.peak_frontier_size,
             "timeout_reached": self.statistics.timeout_reached,
             "duplicates_pruned": self.statistics.duplicates_pruned,
+            "llm_calls": self.statistics.llm_calls,
+            "llm_retries": self.statistics.llm_retries,
         }
