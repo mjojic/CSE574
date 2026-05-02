@@ -48,22 +48,30 @@ def cli(ctx: click.Context, verbose: bool, quiet: bool) -> None:
     "--output", "-o", type=click.Path(path_type=Path), help="Output file for solutions"
 )
 @click.option(
-    "--strategy", default="best_first",
-    type=click.Choice(["best_first", "breadth_first", "depth_first"]),
-    help="Search strategy to use"
-)
-@click.option(
-    "--heuristic", default="zero",
-    type=click.Choice(["zero", "goal_count", "relaxed_plan"]),
-    help="Heuristic function to use"
-)
-@click.option(
-    "--llm/--no-llm", default=False,
+    "--heuristic", default="add",
+    type=click.Choice(["oc", "fc", "tc", "ps", "add", "max", "ff", "llm"]),
     help=(
-        "Use the LLM as a search-control heuristic: it picks the next frontier"
-        " node, the next open-condition flaw, and a single resolver per"
-        " expansion (with reprompt-on-dead-end backtracking). Works with the"
-        " official OpenAI API and any OpenAI-compatible server (e.g. vLLM)."
+        "POCL heuristic — structural: 'oc' (open conditions), 'fc' (flaws+threats),"
+        " 'tc' (threats only), 'ps' (plan-size penalty);"
+        " state-based: 'add' (h_add, default), 'max' (h_max, admissible),"
+        " 'ff' (h_FF, strongest); 'llm' (LLM picks next frontier node)"
+    )
+)
+@click.option(
+    "--flaw-selection-strat", default="lcfr",
+    type=click.Choice(["lcfr", "zlifo", "lifo", "fifo", "random", "llm"]),
+    help=(
+        "Open-condition flaw ordering: 'lcfr' (least-constrained-first / fail-first),"
+        " 'zlifo', 'lifo' (most-recently-introduced), 'fifo' (oldest-first),"
+        " 'random', or 'llm' (delegate flaw choice to the LLM)"
+    )
+)
+@click.option(
+    "--resolver-strat", default="enumerate",
+    type=click.Choice(["enumerate", "llm"]),
+    help=(
+        "'enumerate' pushes every consistent resolver successor onto the frontier."
+        " 'llm' picks exactly one resolver per expansion and reprompts on dead ends."
     )
 )
 @click.option(
@@ -73,10 +81,6 @@ def cli(ctx: click.Context, verbose: bool, quiet: bool) -> None:
         f" {DEFAULT_MODEL}). For vLLM, pass the model id served by the"
         " endpoint, e.g. 'Qwen/Qwen3-32B-FP8'."
     )
-)
-@click.option(
-    "--llm-top-k", default=10, type=int,
-    help="Number of frontier candidates exposed to the LLM per node selection"
 )
 @click.option(
     "--llm-base-url", default=None,
@@ -104,14 +108,6 @@ def cli(ctx: click.Context, verbose: bool, quiet: bool) -> None:
         " back to 'json_object' if the server rejects 'json_schema'."
     )
 )
-@click.option(
-    "--llm-single-resolver/--llm-expand-all", default=True,
-    help=(
-        "Default --llm-single-resolver: pick exactly one resolver per"
-        " expansion and reprompt on dead ends. --llm-expand-all keeps the"
-        " legacy behavior of enqueuing every consistent successor."
-    )
-)
 @click.pass_context
 def solve(
     ctx: click.Context,
@@ -120,47 +116,40 @@ def solve(
     max_solutions: int,
     timeout: float,
     output: Path | None,
-    strategy: str,
     heuristic: str,
-    llm: bool,
+    flaw_selection_strat: str,
+    resolver_strat: str,
     llm_model: str | None,
-    llm_top_k: int,
     llm_base_url: str | None,
     llm_api_key: str | None,
     llm_response_format: str,
-    llm_single_resolver: bool,
 ) -> None:
     """Solve a planning problem."""
     verbose = ctx.obj["verbose"]
     quiet = ctx.obj["quiet"]
 
+    needs_llm = (
+        heuristic == "llm"
+        or flaw_selection_strat == "llm"
+        or resolver_strat == "llm"
+    )
+
     try:
         if not quiet:
             console.print(f"Domain: [cyan]{domain_file}[/cyan]")
             console.print(f"Problem: [cyan]{problem_file}[/cyan]")
-            if llm:
-                expansion_label = (
-                    "single-resolver+reprompt"
-                    if llm_single_resolver
-                    else "expand-all"
-                )
-                console.print(
-                    "Strategy: [magenta]llm[/magenta]"
-                    f" (model: [cyan]{llm_model or 'env/default'}[/cyan],"
-                    f" top_k: [cyan]{llm_top_k}[/cyan],"
-                    f" base_url: [cyan]{llm_base_url or 'env/default'}[/cyan],"
-                    f" expansion: [cyan]{expansion_label}[/cyan])"
-                )
-                console.print(
-                    "[yellow]Note:[/yellow] --llm overrides --strategy and"
-                    " the default flaw-selection policy."
-                )
-            else:
-                console.print(f"Strategy: [yellow]{strategy}[/yellow]")
             console.print(f"Heuristic: [yellow]{heuristic}[/yellow]")
+            console.print(f"Flaw selection: [yellow]{flaw_selection_strat}[/yellow]")
+            console.print(f"Resolver strategy: [yellow]{resolver_strat}[/yellow]")
+            if needs_llm:
+                console.print(
+                    "LLM model: [cyan]"
+                    + (llm_model or "env/default")
+                    + "[/cyan]"
+                    + (f"  base_url: [cyan]{llm_base_url}[/cyan]" if llm_base_url else "")
+                )
             console.print()
 
-        # Compile domain and problem
         with Progress(
             SpinnerColumn(),
             TextColumn("[progress.description]{task.description}"),
@@ -179,13 +168,10 @@ def solve(
                 console.print(f"[red]Error compiling domain/problem:[/red] {e}")
                 sys.exit(1)
 
-        # Create planner
         llm_config: LLMConfig | None = None
-        if llm:
+        if needs_llm:
             llm_config = LLMConfig(
-                top_k=llm_top_k,
                 response_format=llm_response_format,
-                single_resolver=llm_single_resolver,
             )
             if llm_model:
                 llm_config.model = llm_model
@@ -195,14 +181,13 @@ def solve(
                 llm_config.api_key = llm_api_key
 
         planner = DPOCLPlanner(
-            search_strategy=strategy,
             heuristic=heuristic,
             verbose=verbose,
-            use_llm=llm,
+            flaw_selection_strat=flaw_selection_strat,
+            resolver_strat=resolver_strat,
             llm_config=llm_config,
         )
 
-        # Solve problem
         if not quiet:
             console.print(f"Searching for up to {max_solutions} solutions...")
             console.print()
@@ -233,7 +218,6 @@ def solve(
                 console.print(f"[red]Planning error:[/red] {e}")
                 sys.exit(1)
 
-        # Display results
         if solutions:
             if not quiet:
                 console.print(f"[green]Found {len(solutions)} solution(s)![/green]")
@@ -243,7 +227,6 @@ def solve(
                 if not quiet:
                     console.print(f"[bold]Solution {i}:[/bold]")
 
-                    # Display solution steps
                     steps = solution.to_execution_sequence()
                     if steps:
                         table = Table(title=f"Solution {i} Steps")
@@ -259,7 +242,6 @@ def solve(
 
                     console.print()
 
-            # Display statistics
             if verbose and stats:
                 stats_table = Table(title="Planning Statistics")
                 stats_table.add_column("Metric", style="cyan")
@@ -270,7 +252,6 @@ def solve(
 
                 console.print(stats_table)
 
-            # Save to output file if specified
             if output:
                 try:
                     with open(output, "w") as f:
@@ -312,7 +293,6 @@ def validate(
         if not quiet:
             console.print("Validating domain and problem files...")
 
-        # Compile and validate
         try:
             problem = compile_domain_and_problem(domain_file, problem_file)
 
@@ -352,14 +332,12 @@ def compile(
         if not quiet:
             console.print("Compiling domain and problem...")
 
-        # Compile
         problem = compile_domain_and_problem(domain_file, problem_file)
         ground_steps = problem.operators
 
         if not quiet:
             console.print(f"[green]Successfully compiled {len(ground_steps)} ground steps[/green]")
 
-        # Save or display
         if output:
             try:
                 with open(output, "w") as f:
@@ -378,13 +356,12 @@ def compile(
                 console.print(f"[red]Error saving output:[/red] {e}")
 
         elif not quiet:
-            # Display summary
             table = Table(title="Ground Steps Summary")
             table.add_column("Step", style="cyan")
             table.add_column("Operator", style="white")
             table.add_column("Parameters", style="yellow")
 
-            for i, step in enumerate(ground_steps[:10]):  # Show first 10
+            for i, step in enumerate(ground_steps[:10]):
                 table.add_row(
                     str(i),
                     str(step.name),
@@ -406,16 +383,21 @@ def examples() -> None:
     """Show usage examples."""
     console.print("[bold]PyDPOCL Usage Examples[/bold]\n")
 
-    examples = [
-        ("Basic planning", "pydpocl solve domain.pddl problem.pddl"),
+    examples_list = [
+        ("Basic planning (h_add, lcfr)", "pydpocl solve domain.pddl problem.pddl"),
         ("Find multiple solutions", "pydpocl solve domain.pddl problem.pddl -k 5"),
-        ("Use different search strategy", "pydpocl solve domain.pddl problem.pddl --strategy breadth_first"),
+        ("Use h_FF heuristic", "pydpocl solve domain.pddl problem.pddl --heuristic ff"),
+        ("Use h_max heuristic (admissible)", "pydpocl solve domain.pddl problem.pddl --heuristic max"),
+        ("Open-condition count heuristic + zlifo", "pydpocl solve domain.pddl problem.pddl --heuristic oc --flaw-selection-strat zlifo"),
+        ("LLM node selection only", "pydpocl solve domain.pddl problem.pddl --heuristic llm"),
+        ("LLM flaw selection only", "pydpocl solve domain.pddl problem.pddl --flaw-selection-strat llm"),
+        ("Full LLM control", "pydpocl solve domain.pddl problem.pddl --heuristic llm --flaw-selection-strat llm --resolver-strat llm"),
         ("Save solutions to file", "pydpocl solve domain.pddl problem.pddl -o solutions.txt"),
         ("Validate domain/problem", "pydpocl validate domain.pddl problem.pddl"),
         ("Compile to ground steps", "pydpocl compile domain.pddl problem.pddl -o ground_steps.txt"),
     ]
 
-    for description, command in examples:
+    for description, command in examples_list:
         console.print(f"[cyan]{description}:[/cyan]")
         console.print(f"  {command}")
         console.print()

@@ -366,19 +366,17 @@ class Plan(Identifiable):
         return self.id == other.id
 
     def __lt__(self, other: object) -> bool:
-        """Define ordering for plans (for use in priority queues)."""
+        """Define ordering for plans (for use in priority queues).
+
+        Note: f(n) = g(n) + h(n) priority is computed and supplied externally
+        by the planner (see DPOCLPlanner._try_push).  This fallback orders by
+        refinement depth then flaw count, and is used only when two plans share
+        the same heap priority.
+        """
         if not isinstance(other, Plan):
             return NotImplemented
 
-        # Primary: cost + heuristic (f-value)
-        # Secondary: cost (g-value)
-        # Tertiary: number of flaws
-        f_value_self = self.cost  # + heuristic would be added here
-        f_value_other = other.cost  # + heuristic would be added here
-
-        if f_value_self != f_value_other:
-            return f_value_self < f_value_other
-        elif self.cost != other.cost:
+        if self.cost != other.cost:
             return self.cost < other.cost
         elif len(self.flaws) != len(other.flaws):
             return len(self.flaws) < len(other.flaws)

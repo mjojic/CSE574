@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import random
 from dataclasses import dataclass, field
 
 from pydpocl.core.flaw_simple import CausalLink, OpenConditionFlaw
@@ -129,6 +130,45 @@ def select_flaw_zlifo(
 
     # All unforced: pick LIFO (highest age = most recently introduced).
     return max(unforced, key=lambda f: f.age)
+
+
+def select_flaw_lifo(
+    plan: Plan,
+    problem: PlanningProblem,  # noqa: ARG001 – kept for uniform signature
+) -> OpenConditionFlaw | None:
+    """LIFO: repair the most recently introduced flaw (highest age).
+
+    Simple stack-like baseline – no resolver counting required.
+    """
+    if not plan.flaws:
+        return None
+    return max(plan.flaws, key=lambda f: (f.age, f.step.signature, f.condition.signature))
+
+
+def select_flaw_fifo(
+    plan: Plan,
+    problem: PlanningProblem,  # noqa: ARG001
+) -> OpenConditionFlaw | None:
+    """FIFO: repair the oldest introduced flaw (lowest age).
+
+    Simple queue-like baseline – no resolver counting required.
+    """
+    if not plan.flaws:
+        return None
+    return min(plan.flaws, key=lambda f: (f.age, f.step.signature, f.condition.signature))
+
+
+def select_flaw_random(
+    plan: Plan,
+    problem: PlanningProblem,  # noqa: ARG001
+) -> OpenConditionFlaw | None:
+    """Random: choose a uniformly random flaw.
+
+    Lower-bound baseline for comparing informed strategies.
+    """
+    if not plan.flaws:
+        return None
+    return random.choice(list(plan.flaws))
 
 
 @dataclass(frozen=True, slots=True)

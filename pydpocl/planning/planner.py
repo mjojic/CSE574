@@ -1,4 +1,4 @@
-"""Main DPOCL planner implementation."""
+"""Main POCL planner implementation."""
 
 from __future__ import annotations
 
@@ -10,19 +10,31 @@ from typing import Any
 from pydpocl.core.flaw_simple import OpenConditionFlaw
 from pydpocl.core.interfaces import BasePlanner, PlanningProblem
 from pydpocl.core.plan import Plan, create_initial_plan
-from pydpocl.planning.heuristic import create_heuristic
+from pydpocl.planning.heuristic import OpenConditionHeuristic, create_heuristic
 from pydpocl.planning.llm_policy import LLMConfig, LLMPolicy, LLMPolicyError
+from pydpocl.planning.plan_fingerprint import structural_fingerprint
 from pydpocl.planning.pocl_expansion import (
     apply_resolver,
     enumerate_resolvers,
     expand_open_condition,
     find_unresolved_threats,
     resolve_threat,
+    select_flaw_fifo,
     select_flaw_lcfr,
+    select_flaw_lifo,
+    select_flaw_random,
     select_flaw_zlifo,
 )
-from pydpocl.planning.plan_fingerprint import structural_fingerprint
-from pydpocl.planning.search import create_search_strategy
+from pydpocl.planning.search import BestFirstSearch, LLMSearch
+
+_VALID_HEURISTICS = ("oc", "fc", "tc", "ps", "add", "max", "ff", "llm")
+_VALID_FLAW_SELECTION_STRATS = ("lcfr", "zlifo", "lifo", "fifo", "random", "llm")
+_VALID_RESOLVER_STRATS = ("enumerate", "llm")
+
+
+def _g_value(plan: Plan) -> int:
+    """Number of non-dummy steps added to the plan so far (plan-length proxy)."""
+    return sum(1 for s in plan.steps if not s.name.startswith("__"))
 
 
 @dataclass
@@ -58,42 +70,73 @@ class PlanningStatistics:
 
 
 class DPOCLPlanner(BasePlanner[Plan, Plan]):
-    """POCL planner with systematic frontier-based search.
+    """POCL planner with best-first frontier-based search.
 
     Each node in the search space is an immutable partial plan.  At each
-    iteration the planner pops the best plan, checks for unresolved threats
-    (resolved by promotion/demotion branching), then resolves one open
-    condition (by reusing an existing step or instantiating a new operator).
-    All alternatives are pushed onto the frontier, giving complete search.
+    iteration the planner pops the lowest-priority plan, resolves any
+    unresolved threats (promotion/demotion branching), then resolves one
+    open condition (by reusing an existing step or instantiating a new
+    operator).  All successors are pushed with priority f(n) = g(n) + h(n)
+    where g(n) is the number of non-dummy steps already in the plan and h(n)
+    is the chosen POCL heuristic estimate.
+
+    Parameters
+    ----------
+    heuristic:
+        POCL heuristic: ``oc`` (open-condition count), ``add`` (h_add),
+        ``max`` (h_max), ``ff`` (h_FF), or ``llm`` (delegates node selection
+        to the LLM — the LLM picks from the full frontier instead of using
+        a numeric h-value).
+    flaw_selection_strat:
+        Open-condition flaw ordering: ``lcfr`` (least-constrained-first /
+        fail-first), ``zlifo``, or ``llm`` (delegates flaw choice to the LLM).
+    resolver_strat:
+        How resolvers are expanded: ``enumerate`` (push every consistent
+        successor) or ``llm`` (pick one and reprompt on dead ends).
     """
 
     def __init__(
         self,
-        search_strategy: str = "best_first",
-        heuristic: str = "zero",
+        heuristic: str = "add",
         verbose: bool = False,
         dedupe_structural: bool = True,
-        flaw_order: str = "lcfr",
-        use_llm: bool = False,
+        flaw_selection_strat: str = "lcfr",
+        resolver_strat: str = "enumerate",
         llm_config: LLMConfig | None = None,
     ):
-        self.search_strategy = search_strategy
+        if heuristic not in _VALID_HEURISTICS:
+            raise ValueError(
+                f"heuristic must be one of {_VALID_HEURISTICS}"
+            )
+        if flaw_selection_strat not in _VALID_FLAW_SELECTION_STRATS:
+            raise ValueError(
+                f"flaw_selection_strat must be one of {_VALID_FLAW_SELECTION_STRATS}"
+            )
+        if resolver_strat not in _VALID_RESOLVER_STRATS:
+            raise ValueError(
+                f"resolver_strat must be one of {_VALID_RESOLVER_STRATS}"
+            )
+
         self.heuristic = heuristic
         self.verbose = verbose
         self.dedupe_structural = dedupe_structural
-        # Backward-compatible alias: MRV previously referred to this LCFR selector.
-        if flaw_order == "mrv":
-            flaw_order = "lcfr"
-        if flaw_order not in ("lcfr", "zlifo", "priority"):
-            raise ValueError("flaw_order must be 'lcfr', 'zlifo', or 'priority'")
-        self.flaw_order = flaw_order
-        self.use_llm = use_llm
+        self.flaw_selection_strat = flaw_selection_strat
+        self.resolver_strat = resolver_strat
         self.llm_config = llm_config or LLMConfig()
         self.statistics = PlanningStatistics()
-        # Cleared at the start of each solve(); tracks deferred OR-decisions
-        # under LLM single-resolver mode so we can re-prompt after subtree
-        # exhaustion (see :class:`PendingExpansion`).
         self._pending_expansions: list[PendingExpansion] = []
+
+    @property
+    def _llm_search(self) -> bool:
+        """True when the LLM drives node selection (heuristic == 'llm')."""
+        return self.heuristic == "llm"
+
+    def _needs_llm(self) -> bool:
+        return (
+            self._llm_search
+            or self.flaw_selection_strat == "llm"
+            or self.resolver_strat == "llm"
+        )
 
     def solve(
         self,
@@ -115,42 +158,36 @@ class DPOCLPlanner(BasePlanner[Plan, Plan]):
         self.statistics = PlanningStatistics()
         self._pending_expansions = []
 
-        single_resolver = (
-            self.use_llm and self.llm_config.single_resolver
-        )
+        commit_resolver = self.resolver_strat == "llm"
 
         if self.verbose:
-            strat_label = "llm" if self.use_llm else self.search_strategy
-            print(f"Starting DPOCL planning with {strat_label} search")
-            print(f"Using {self.heuristic} heuristic")
-            if self.use_llm:
-                mode = (
-                    "single-resolver + reprompt"
-                    if single_resolver
-                    else "expand-all-resolvers"
-                )
-                print(
-                    f"LLM control enabled (model={self.llm_config.model},"
-                    f" top_k={self.llm_config.top_k}, expansion={mode})"
-                )
+            print(
+                f"Starting POCL planning"
+                f" | heuristic={self.heuristic}"
+                f" | flaw_selection={self.flaw_selection_strat}"
+                f" | resolver={self.resolver_strat}"
+            )
+            if self._needs_llm():
+                print(f"LLM control enabled (model={self.llm_config.model})")
             print(f"Looking for up to {max_solutions} solutions")
             if timeout:
                 print(f"Timeout: {timeout} seconds")
 
-        heuristic_fn = create_heuristic(self.heuristic)
         llm_policy: LLMPolicy | None = None
-        if self.use_llm:
+        if self._needs_llm():
             llm_policy = LLMPolicy(self.llm_config)
-            frontier = create_search_strategy(
-                "llm",
-                policy=llm_policy,
-                problem=problem,
-                top_k=self.llm_config.top_k,
-            )
+
+        if self._llm_search:
+            if llm_policy is None:
+                raise ValueError("heuristic='llm' requires a configured LLM policy")
+            frontier = LLMSearch(policy=llm_policy, problem=problem)
+            # Priority is not used for LLM node selection; use OC as a cheap dummy.
+            heuristic_fn = OpenConditionHeuristic()
         else:
-            frontier = create_search_strategy(self.search_strategy)
-        # Structural fingerprints already enqueued or expanded — avoids revisiting
-        # the same partial plan reached via different expansion orders.
+            frontier = BestFirstSearch()
+            heuristic_fn = create_heuristic(self.heuristic)
+            heuristic_fn.prepare(problem)
+
         seen: set[tuple] = set()
 
         initial_plan = create_initial_plan(problem.initial_state, problem.goal_state)
@@ -165,12 +202,8 @@ class DPOCLPlanner(BasePlanner[Plan, Plan]):
                     break
 
                 if frontier.is_empty():
-                    if not single_resolver or not self._pending_expansions:
+                    if not commit_resolver or not self._pending_expansions:
                         break
-                    # The active branch is "killed": no descendants of the
-                    # most recently chosen resolver remain.  Reprompt the LLM
-                    # for an alternative resolver of the deepest pending
-                    # decision.
                     pe = self._pending_expansions[-1]
                     progressed = self._reprompt_resolver(
                         pe,
@@ -181,8 +214,6 @@ class DPOCLPlanner(BasePlanner[Plan, Plan]):
                         seen=seen,
                     )
                     if not progressed:
-                        # All resolvers exhausted at this decision — pop and
-                        # backtrack to the next-deepest pending decision.
                         self._pending_expansions.pop()
                     continue
 
@@ -213,19 +244,23 @@ class DPOCLPlanner(BasePlanner[Plan, Plan]):
                     continue
 
                 # --- flaw selection ---
-                if self.use_llm and llm_policy is not None:
+                if self.flaw_selection_strat == "llm" and llm_policy is not None:
                     flaw = llm_policy.select_flaw(plan, problem)
-                elif self.flaw_order == "lcfr":
+                elif self.flaw_selection_strat == "lcfr":
                     flaw = select_flaw_lcfr(plan, problem)
-                elif self.flaw_order == "zlifo":
+                elif self.flaw_selection_strat == "zlifo":
                     flaw = select_flaw_zlifo(plan, problem)
-                else:
-                    flaw = plan.select_flaw()
+                elif self.flaw_selection_strat == "lifo":
+                    flaw = select_flaw_lifo(plan, problem)
+                elif self.flaw_selection_strat == "fifo":
+                    flaw = select_flaw_fifo(plan, problem)
+                else:  # random
+                    flaw = select_flaw_random(plan, problem)
                 if flaw is None:
                     continue
 
                 # --- open-condition expansion ---
-                if single_resolver and llm_policy is not None:
+                if commit_resolver and llm_policy is not None:
                     self._expand_single_resolver(
                         plan,
                         flaw,
@@ -265,8 +300,9 @@ class DPOCLPlanner(BasePlanner[Plan, Plan]):
                 self.statistics.duplicates_pruned += 1
                 return False
             seen.add(fp)
-        p = plan.cost + heuristic_fn.estimate(plan)
-        frontier.add_plan(plan, priority=p)
+        g = _g_value(plan)
+        h = heuristic_fn.estimate(plan)
+        frontier.add_plan(plan, priority=float(g + h))
         self._track_frontier(frontier)
         return True
 
@@ -281,12 +317,7 @@ class DPOCLPlanner(BasePlanner[Plan, Plan]):
         frontier,
         seen: set[tuple],
     ) -> None:
-        """LLM-driven expansion that commits to one resolver and stashes the rest.
-
-        Generates exactly one successor (the resolver chosen by the LLM) and
-        records the unchosen alternatives as a :class:`PendingExpansion` so
-        the planner can come back to them after a dead end.
-        """
+        """LLM-driven expansion that commits to one resolver and stashes the rest."""
         candidates = enumerate_resolvers(plan, flaw, problem)
         if not candidates:
             return
@@ -297,8 +328,6 @@ class DPOCLPlanner(BasePlanner[Plan, Plan]):
         excluded: set[str] = {chosen.id}
         if successor is not None:
             self._try_push(successor, frontier, heuristic_fn, seen)
-        # If only one resolver existed (or all but the chosen one would be
-        # excluded immediately) there is nothing left to defer.
         if len(candidates) > 1:
             self._pending_expansions.append(
                 PendingExpansion(plan=plan, flaw=flaw, excluded=excluded)
@@ -316,8 +345,7 @@ class DPOCLPlanner(BasePlanner[Plan, Plan]):
     ) -> bool:
         """Try to push one more sibling resolver for the deferred decision *pe*.
 
-        Returns True if a new successor was selected (whether or not it ended
-        up actually entering the frontier after dedup) and False when every
+        Returns True if a new successor was selected and False when every
         candidate has been exhausted or the LLM failed.
         """
         candidates = enumerate_resolvers(pe.plan, pe.flaw, problem)
@@ -342,9 +370,6 @@ class DPOCLPlanner(BasePlanner[Plan, Plan]):
         if successor is not None:
             self._try_push(successor, frontier, heuristic_fn, seen)
             self.statistics.nodes_expanded += 1
-        # Even if the successor was inconsistent or deduped, count this as
-        # progress so the caller advances the agenda; the resolver is now in
-        # ``excluded`` and will not be chosen again.
         return True
 
     def _track_frontier(self, frontier) -> None:

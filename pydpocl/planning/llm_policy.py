@@ -1,16 +1,17 @@
 """LLM-driven decision policy for the DPOCL planner.
 
-When ``--llm`` is enabled the planner outsources three control decisions to a
-chat model exposed through any OpenAI-compatible endpoint (the official
-OpenAI API, a self-hosted vLLM server, etc.):
+When one or more strategy knobs is set to ``llm``, the planner outsources
+the corresponding control decisions to a chat model exposed through any
+OpenAI-compatible endpoint (the official OpenAI API, a self-hosted vLLM
+server, etc.):
 
   1. **Next-node selection** -- which partial plan from the search frontier
-     should be expanded next (when ``LLMFrontier`` is in use).
+     should be expanded next (when ``heuristic="llm"``).
   2. **Flaw selection** -- which open-condition flaw of the popped plan
-     should be resolved next.
-  3. **Resolver selection** -- which single resolver (existing-step reuse or
-     new-operator instantiation) should be applied to the chosen flaw, with
-     re-prompting after a previously chosen resolver has been abandoned.
+     should be resolved next (when ``flaw_selection_strat="llm"``).
+  3. **Resolver selection** -- which single resolver should be applied to
+     the chosen flaw, with re-prompting after a dead end
+     (when ``resolver_strat="llm"``).
 
 All calls go through :class:`LLMPolicy`, which prefers OpenAI structured
 outputs (JSON schema, ``strict=True``) and gracefully falls back to plain
@@ -31,6 +32,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
@@ -77,7 +79,6 @@ class LLMConfig:
     """Configuration for :class:`LLMPolicy`."""
 
     model: str = field(default_factory=_env_model)
-    top_k: int = 10
     max_retries: int = 3
     temperature: float = 0.0
     # Optional explicit api key; otherwise the OpenAI SDK reads OPENAI_API_KEY.
@@ -91,11 +92,6 @@ class LLMConfig:
     # "none" (rely entirely on prompt instructions). vLLM works best with
     # "json_object" or "none" depending on the version.
     response_format: str = "json_schema"
-    # If True (default) the planner asks the LLM to pick exactly one resolver
-    # per open-condition expansion; failed branches are re-prompted with the
-    # rejected resolver excluded.  Set False to keep the legacy "expand all
-    # successors at once" behavior for benchmarking.
-    single_resolver: bool = True
 
 
 # ---------------------------------------------------------------------------
@@ -107,22 +103,12 @@ class NodeChoice(BaseModel):
     """LLM response schema for next-node selection."""
 
     choice_id: str = Field(description="The candidate plan id to expand next.")
-    reason: str = Field(
-        default="",
-        max_length=400,
-        description="Brief justification (<= 400 chars).",
-    )
 
 
 class FlawChoice(BaseModel):
     """LLM response schema for flaw selection."""
 
     flaw_id: str = Field(description="The open-condition flaw id to resolve next.")
-    reason: str = Field(
-        default="",
-        max_length=400,
-        description="Brief justification (<= 400 chars).",
-    )
 
 
 class ResolverChoice(BaseModel):
@@ -130,11 +116,6 @@ class ResolverChoice(BaseModel):
 
     resolver_id: str = Field(
         description="The resolver id to apply to the current open-condition flaw."
-    )
-    reason: str = Field(
-        default="",
-        max_length=400,
-        description="Brief justification (<= 400 chars).",
     )
 
 
@@ -178,14 +159,7 @@ def serialize_problem(problem: "PlanningProblem") -> dict[str, Any]:
 def serialize_plan_full(
     plan: Plan, problem: "PlanningProblem"
 ) -> dict[str, Any]:
-    """Full JSON-friendly snapshot of a partial plan.
-
-    Includes steps with preconditions/effects, ordering constraints, causal
-    links, open-condition flaws (with resolver counts), unresolved threats,
-    and the goal literals.  Used as the body of every LLM decision prompt so
-    the model sees the same uniform POCL state regardless of which kind of
-    decision (node / flaw / resolver) it is being asked to make.
-    """
+    """Full JSON-friendly snapshot of a partial plan."""
     sl = plan.step_lookup
 
     steps: list[dict[str, Any]] = []
@@ -292,13 +266,7 @@ def serialize_resolver_candidates(
     flaw: OpenConditionFlaw,
     candidates: list[ResolverCandidate],
 ) -> list[dict[str, Any]]:
-    """Render resolver candidates for the LLM prompt.
-
-    Each entry is grounded in the partial plan: ``reuse`` resolvers cite the
-    short id of the producing step (so the LLM can cross-reference the
-    serialized plan), and ``new`` resolvers spell out the operator template's
-    preconditions/effects so the LLM can reason about cascade flaws.
-    """
+    """Render resolver candidates for the LLM prompt."""
     payload: list[dict[str, Any]] = []
     for cand in candidates:
         entry: dict[str, Any] = {
@@ -322,6 +290,28 @@ def serialize_resolver_candidates(
 
 
 # ---------------------------------------------------------------------------
+# Think-token / markdown stripping
+# ---------------------------------------------------------------------------
+
+_THINK_RE = re.compile(r"<think>.*?</think>", re.DOTALL | re.IGNORECASE)
+_TRAILING_THINK_CLOSE_RE = re.compile(r"^\s*</think>", re.IGNORECASE)
+_CODE_FENCE_RE = re.compile(r"```(?:json)?\s*([\s\S]*?)```", re.IGNORECASE)
+
+
+def _strip_think_tokens(text: str) -> str:
+    """Remove <think>...</think> blocks and stray </think> tags, then unwrap
+    Markdown JSON code fences if the model wrapped its output in one."""
+    text = _THINK_RE.sub("", text)
+    text = _TRAILING_THINK_CLOSE_RE.sub("", text)
+    text = text.strip()
+    # If the model wrapped the JSON in a ```json ... ``` block, unwrap it.
+    fence_match = _CODE_FENCE_RE.search(text)
+    if fence_match:
+        text = fence_match.group(1).strip()
+    return text
+
+
+# ---------------------------------------------------------------------------
 # Prompts
 # ---------------------------------------------------------------------------
 
@@ -338,8 +328,8 @@ _SYSTEM_PROMPT = (
     " and resolves it by either reusing an existing step or instantiating a"
     " new operator that produces the needed condition.\n\n"
     "Your job is to make ONE control decision per call. The user message"
-    " gives you the problem and either (a) a list of candidate plans on the"
-    " frontier, (b) a list of open-condition flaws of the current plan, or"
+    " gives you the problem and either (a) the full frontier of candidate"
+    " plans, (b) a list of open-condition flaws of the current plan, or"
     " (c) a list of resolvers for one specific flaw. Pick the option most"
     " likely to lead to a complete, low-cost plan as quickly as possible."
     " Prefer narrow choices (few resolvers) and choices that unblock"
@@ -359,10 +349,9 @@ def _build_node_user_prompt(
         "Pick exactly one candidate plan to expand next.\n\n"
         "Problem:\n"
         + json.dumps(problem_payload, indent=2)
-        + "\n\nCandidates (top-K of the frontier, ranked best-first by f = g + h):\n"
+        + "\n\nFrontier (every open partial plan, ranked best-first by f = g + h):\n"
         + json.dumps(candidates_payload, indent=2)
-        + "\n\nReturn JSON {\"choice_id\": <one of the ids above>,"
-        " \"reason\": <short string>}."
+        + "\n\nReturn JSON {\"choice_id\": <one of the ids above>}."
     )
 
 
@@ -373,14 +362,13 @@ def _build_flaw_user_prompt(
     return (
         "Decision: FLAW_SELECTION\n"
         "Pick exactly one open-condition flaw of the current plan to resolve"
-        " next. Lower resolver_count usually means a more constrained, less"
-        " branchy choice (fail-first heuristic).\n\n"
+        " next. Lower resolver_count means a more constrained choice"
+        " (fail-first heuristic).\n\n"
         "Problem:\n"
         + json.dumps(problem_payload, indent=2)
         + "\n\nCurrent plan:\n"
         + json.dumps(plan_payload, indent=2)
-        + "\n\nReturn JSON {\"flaw_id\": <one of the flaw ids above>,"
-        " \"reason\": <short string>}."
+        + "\n\nReturn JSON {\"flaw_id\": <one of the flaw ids above>}."
     )
 
 
@@ -413,8 +401,7 @@ def _build_resolver_user_prompt(
         + "\n\nResolver candidates:\n"
         + json.dumps(candidates_payload, indent=2)
         + excluded_block
-        + "\n\nReturn JSON {\"resolver_id\": <one of the resolver ids above>,"
-        " \"reason\": <short string>}."
+        + "\n\nReturn JSON {\"resolver_id\": <one of the resolver ids above>}."
     )
 
 
@@ -426,30 +413,27 @@ def _build_resolver_user_prompt(
 _NODE_SCHEMA = {
     "type": "object",
     "additionalProperties": False,
-    "required": ["choice_id", "reason"],
+    "required": ["choice_id"],
     "properties": {
         "choice_id": {"type": "string"},
-        "reason": {"type": "string"},
     },
 }
 
 _FLAW_SCHEMA = {
     "type": "object",
     "additionalProperties": False,
-    "required": ["flaw_id", "reason"],
+    "required": ["flaw_id"],
     "properties": {
         "flaw_id": {"type": "string"},
-        "reason": {"type": "string"},
     },
 }
 
 _RESOLVER_SCHEMA = {
     "type": "object",
     "additionalProperties": False,
-    "required": ["resolver_id", "reason"],
+    "required": ["resolver_id"],
     "properties": {
         "resolver_id": {"type": "string"},
-        "reason": {"type": "string"},
     },
 }
 
@@ -499,8 +483,6 @@ class LLMPolicy:
         if self.config.api_key:
             kwargs["api_key"] = self.config.api_key
         elif self.config.base_url and not os.environ.get("OPENAI_API_KEY"):
-            # Local servers (vLLM, llama.cpp, etc.) typically ignore the key
-            # but the SDK still requires a non-empty value.
             kwargs["api_key"] = "EMPTY"
         if self.config.base_url:
             kwargs["base_url"] = self.config.base_url
@@ -516,20 +498,18 @@ class LLMPolicy:
     ) -> Plan:
         """Pick one plan from ``candidates``.
 
-        ``candidates`` is a list of ``(priority, plan)`` pairs, already
-        truncated to the top-K by the caller and sorted best-first.
+        ``candidates`` is a list of ``(priority, plan)`` pairs covering the
+        entire frontier, sorted best-first.
         """
         if not candidates:
             raise ValueError("select_node called with empty candidates")
         if len(candidates) == 1:
             return candidates[0][1]
 
-        # id -> plan map (short ids derived from UUIDs are unique within K).
         id_map: dict[str, Plan] = {}
         candidates_payload: list[dict[str, Any]] = []
         for rank, (priority, plan) in enumerate(candidates):
             cid = _short_id(plan)
-            # If two plans happen to share the prefix, disambiguate.
             while cid in id_map:
                 cid = cid + "_"
             id_map[cid] = plan
@@ -573,7 +553,6 @@ class LLMPolicy:
             id_map[fid] = f
 
         plan_payload = serialize_plan_full(plan, problem)
-        # Re-stamp flaw ids in the payload so they match id_map exactly.
         plan_payload["flaws"] = [
             {
                 "id": fid,
@@ -607,13 +586,7 @@ class LLMPolicy:
         problem: "PlanningProblem",
         excluded: set[str] | None = None,
     ) -> ResolverCandidate:
-        """Pick exactly one resolver from ``candidates`` for ``flaw``.
-
-        ``excluded`` lists resolver ids whose subtrees have already been
-        abandoned by the planner; the LLM is shown them so it can avoid
-        repeating an obviously failed choice and is forbidden from selecting
-        them via the ``allowed_values`` whitelist.
-        """
+        """Pick exactly one resolver from ``candidates`` for ``flaw``."""
         if not candidates:
             raise ValueError("select_resolver called with no candidates")
         if len(candidates) == 1:
@@ -661,7 +634,6 @@ class LLMPolicy:
             return None
         if mode == "json_object":
             return {"type": "json_object"}
-        # Default: strict JSON schema (OpenAI-style structured outputs).
         return {
             "type": "json_schema",
             "json_schema": {
@@ -687,8 +659,6 @@ class LLMPolicy:
             {"role": "system", "content": _SYSTEM_PROMPT},
             {"role": "user", "content": user_prompt},
         ]
-        # Track the active response_format mode; we may downgrade on server
-        # errors that indicate the strict schema path is not supported.
         active_mode = self.config.response_format
 
         last_error: str | None = None
@@ -708,6 +678,7 @@ class LLMPolicy:
             try:
                 completion = client.chat.completions.create(**kwargs)
                 raw = completion.choices[0].message.content or ""
+                raw = _strip_think_tokens(raw)
                 payload = json.loads(raw)
                 parsed = model_cls.model_validate(payload)
                 value = getattr(parsed, allowed_field)
@@ -720,8 +691,6 @@ class LLMPolicy:
                 last_error = str(exc)
             except Exception as exc:  # network / API errors
                 last_error = f"API error: {exc!r}"
-                # Heuristic fallback: if the server rejects the strict
-                # json_schema path, drop down to json_object on the next try.
                 msg = repr(exc).lower()
                 if active_mode == "json_schema" and (
                     "json_schema" in msg
