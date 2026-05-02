@@ -747,8 +747,8 @@ def build_arg_parser() -> argparse.ArgumentParser:
     )
 
     runp = parser.add_argument_group("runtime")
-    runp.add_argument("--timeout", type=float, default=120.0,
-                      help="Per-job timeout in seconds (default: 120).")
+    runp.add_argument("--timeout", type=float, default=600.0,
+                      help="Per-job timeout in seconds (default: 600).")
     runp.add_argument("--trials", type=int, default=1,
                       help="Repeat the full grid this many times (default: 1).")
     runp.add_argument("--max-concurrency", type=int, default=None,
