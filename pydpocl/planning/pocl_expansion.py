@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass, field
+
 from pydpocl.core.flaw_simple import CausalLink, OpenConditionFlaw
 from pydpocl.core.interfaces import PlanningProblem
 from pydpocl.core.plan import Plan
 from pydpocl.core.step import GroundStep, Step
+from pydpocl.core.types import StepId
 
 
 def find_unresolved_threats(plan: Plan) -> list[tuple[CausalLink, Step]]:
@@ -128,6 +131,120 @@ def select_flaw_zlifo(
     return max(unforced, key=lambda f: f.age)
 
 
+@dataclass(frozen=True, slots=True)
+class ResolverCandidate:
+    """A single way to resolve an open-condition flaw without building the successor.
+
+    ``kind`` is ``"reuse"`` when the producer is an existing step in the plan,
+    or ``"new"`` when a fresh operator instance must be added.  Successor plans
+    are created lazily via :func:`apply_resolver` so callers (e.g. the LLM
+    policy) can enumerate options cheaply and only materialize the chosen one.
+    """
+
+    id: str
+    kind: str  # "reuse" | "new"
+    description: str
+    producer_signature: str
+    source_step_id: StepId | None = None
+    operator_template: GroundStep | None = field(default=None, compare=False)
+
+
+def enumerate_resolvers(
+    plan: Plan,
+    flaw: OpenConditionFlaw,
+    problem: PlanningProblem,
+) -> list[ResolverCandidate]:
+    """Enumerate all candidate resolvers for ``flaw`` without building successors.
+
+    Each candidate has a stable ``id`` of the form ``reuse:<step-short-id>`` or
+    ``new:<operator-signature>`` (with a numeric suffix if collisions arise).
+    """
+    consumer = flaw.step
+    needed = flaw.condition
+    candidates: list[ResolverCandidate] = []
+    used_ids: set[str] = set()
+
+    def _claim(base: str) -> str:
+        if base not in used_ids:
+            used_ids.add(base)
+            return base
+        n = 1
+        while f"{base}#{n}" in used_ids:
+            n += 1
+        cid = f"{base}#{n}"
+        used_ids.add(cid)
+        return cid
+
+    # Branch A: reuse an existing step that already produces the needed literal.
+    for step in plan.steps:
+        if step.id == consumer.id:
+            continue
+        if not step.supports(needed):
+            continue
+        rid = _claim(f"reuse:{step.id.hex[:8]}")
+        candidates.append(
+            ResolverCandidate(
+                id=rid,
+                kind="reuse",
+                description=f"Reuse existing step {step.signature} as producer",
+                producer_signature=step.signature,
+                source_step_id=step.step_id,
+            )
+        )
+
+    # Branch B: instantiate a fresh operator from the problem definition.
+    for template in problem.operators:
+        if not template.supports(needed):
+            continue
+        rid = _claim(f"new:{template.signature}")
+        candidates.append(
+            ResolverCandidate(
+                id=rid,
+                kind="new",
+                description=f"Add a new step {template.signature} as producer",
+                producer_signature=template.signature,
+                operator_template=template,
+            )
+        )
+
+    return candidates
+
+
+def apply_resolver(
+    plan: Plan,
+    flaw: OpenConditionFlaw,
+    resolver: ResolverCandidate,
+) -> Plan | None:
+    """Materialize the successor plan for ``resolver`` or return ``None`` if inconsistent."""
+    consumer = flaw.step
+    needed = flaw.condition
+
+    if resolver.kind == "reuse":
+        if resolver.source_step_id is None:
+            return None
+        source = plan.get_step(resolver.source_step_id)
+        if source is None:
+            return None
+        new_plan = plan.add_causal_link(source, consumer, needed)
+    elif resolver.kind == "new":
+        if resolver.operator_template is None:
+            return None
+        new_op = instantiate_operator(resolver.operator_template)
+        orderings: list[tuple[StepId, StepId]] = []
+        initial_step = plan.initial_step
+        goal_step = plan.goal_step
+        if initial_step:
+            orderings.append((initial_step.step_id, new_op.step_id))
+        if goal_step:
+            orderings.append((new_op.step_id, goal_step.step_id))
+        plan_with_step = plan.add_step(new_op, orderings=orderings)
+        new_plan = plan_with_step.add_causal_link(new_op, consumer, needed)
+    else:
+        return None
+
+    return new_plan if new_plan.is_consistent else None
+
+
 def expand_open_condition(
     plan: Plan,
     flaw: OpenConditionFlaw,
@@ -139,39 +256,9 @@ def expand_open_condition(
     needed literal (includes __INITIAL__ for literals in the initial state).
     Branch B: instantiate a fresh operator from the problem's operator list.
     """
-    consumer = flaw.step
-    needed = flaw.condition
     successors: list[Plan] = []
-
-    initial_step = plan.initial_step
-    goal_step = plan.goal_step
-
-    # --- Branch A: link from an existing step ---
-    for step in plan.steps:
-        if step.id == consumer.id:
-            continue
-        if not step.supports(needed):
-            continue
-        new_plan = plan.add_causal_link(step, consumer, needed)
-        if new_plan.is_consistent:
-            successors.append(new_plan)
-
-    # --- Branch B: add a new operator instance ---
-    for template in problem.operators:
-        if not template.supports(needed):
-            continue
-
-        new_op = instantiate_operator(template)
-
-        orderings = []
-        if initial_step:
-            orderings.append((initial_step.step_id, new_op.step_id))
-        if goal_step:
-            orderings.append((new_op.step_id, goal_step.step_id))
-
-        plan_with_step = plan.add_step(new_op, orderings=orderings)
-        new_plan = plan_with_step.add_causal_link(new_op, consumer, needed)
-        if new_plan.is_consistent:
-            successors.append(new_plan)
-
+    for cand in enumerate_resolvers(plan, flaw, problem):
+        succ = apply_resolver(plan, flaw, cand)
+        if succ is not None:
+            successors.append(succ)
     return successors

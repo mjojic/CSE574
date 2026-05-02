@@ -59,15 +59,58 @@ def cli(ctx: click.Context, verbose: bool, quiet: bool) -> None:
 )
 @click.option(
     "--llm/--no-llm", default=False,
-    help="Outsource node and flaw selection to an OpenAI model"
+    help=(
+        "Use the LLM as a search-control heuristic: it picks the next frontier"
+        " node, the next open-condition flaw, and a single resolver per"
+        " expansion (with reprompt-on-dead-end backtracking). Works with the"
+        " official OpenAI API and any OpenAI-compatible server (e.g. vLLM)."
+    )
 )
 @click.option(
     "--llm-model", default=None,
-    help=f"OpenAI model to use when --llm is set (default: $OPENAI_MODEL or {DEFAULT_MODEL})"
+    help=(
+        "Model identifier (default: $OPENAI_MODEL / $LLM_MODEL or"
+        f" {DEFAULT_MODEL}). For vLLM, pass the model id served by the"
+        " endpoint, e.g. 'Qwen/Qwen3-32B-FP8'."
+    )
 )
 @click.option(
     "--llm-top-k", default=10, type=int,
     help="Number of frontier candidates exposed to the LLM per node selection"
+)
+@click.option(
+    "--llm-base-url", default=None,
+    help=(
+        "OpenAI-compatible base URL (default: $OPENAI_BASE_URL / $LLM_BASE_URL)."
+        " For vLLM use e.g. 'http://localhost:8000/v1'."
+    )
+)
+@click.option(
+    "--llm-api-key", default=None,
+    help=(
+        "Override $OPENAI_API_KEY. Local servers usually ignore this; a"
+        " placeholder is sent automatically when --llm-base-url is set"
+        " without a key."
+    )
+)
+@click.option(
+    "--llm-response-format",
+    type=click.Choice(["json_schema", "json_object", "none"]),
+    default="json_schema",
+    help=(
+        "How to constrain LLM outputs: 'json_schema' (strict OpenAI-style"
+        " structured outputs), 'json_object' (looser; works on most vLLM"
+        " builds), or 'none' (rely on the prompt). The policy auto-falls"
+        " back to 'json_object' if the server rejects 'json_schema'."
+    )
+)
+@click.option(
+    "--llm-single-resolver/--llm-expand-all", default=True,
+    help=(
+        "Default --llm-single-resolver: pick exactly one resolver per"
+        " expansion and reprompt on dead ends. --llm-expand-all keeps the"
+        " legacy behavior of enqueuing every consistent successor."
+    )
 )
 @click.pass_context
 def solve(
@@ -82,6 +125,10 @@ def solve(
     llm: bool,
     llm_model: str | None,
     llm_top_k: int,
+    llm_base_url: str | None,
+    llm_api_key: str | None,
+    llm_response_format: str,
+    llm_single_resolver: bool,
 ) -> None:
     """Solve a planning problem."""
     verbose = ctx.obj["verbose"]
@@ -92,10 +139,17 @@ def solve(
             console.print(f"Domain: [cyan]{domain_file}[/cyan]")
             console.print(f"Problem: [cyan]{problem_file}[/cyan]")
             if llm:
+                expansion_label = (
+                    "single-resolver+reprompt"
+                    if llm_single_resolver
+                    else "expand-all"
+                )
                 console.print(
                     "Strategy: [magenta]llm[/magenta]"
                     f" (model: [cyan]{llm_model or 'env/default'}[/cyan],"
-                    f" top_k: [cyan]{llm_top_k}[/cyan])"
+                    f" top_k: [cyan]{llm_top_k}[/cyan],"
+                    f" base_url: [cyan]{llm_base_url or 'env/default'}[/cyan],"
+                    f" expansion: [cyan]{expansion_label}[/cyan])"
                 )
                 console.print(
                     "[yellow]Note:[/yellow] --llm overrides --strategy and"
@@ -128,9 +182,17 @@ def solve(
         # Create planner
         llm_config: LLMConfig | None = None
         if llm:
-            llm_config = LLMConfig(top_k=llm_top_k)
+            llm_config = LLMConfig(
+                top_k=llm_top_k,
+                response_format=llm_response_format,
+                single_resolver=llm_single_resolver,
+            )
             if llm_model:
                 llm_config.model = llm_model
+            if llm_base_url:
+                llm_config.base_url = llm_base_url
+            if llm_api_key:
+                llm_config.api_key = llm_api_key
 
         planner = DPOCLPlanner(
             search_strategy=strategy,

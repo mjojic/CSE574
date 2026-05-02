@@ -88,12 +88,32 @@ def main() -> None:
     parser.add_argument(
         "--llm",
         action="store_true",
-        help="Outsource node and flaw selection to an OpenAI model (requires OPENAI_API_KEY).",
+        help=(
+            "Use the LLM as a search heuristic (node, flaw, and single-resolver"
+            " selection). Requires either $OPENAI_API_KEY or an OpenAI-compatible"
+            " server (e.g. vLLM) reachable via --llm-base-url / $OPENAI_BASE_URL."
+        ),
     )
     parser.add_argument(
         "--llm-model",
         default=None,
-        help="OpenAI model id (defaults to $OPENAI_MODEL or the LLMConfig default).",
+        help="Model id (defaults to $OPENAI_MODEL / $LLM_MODEL or the LLMConfig default).",
+    )
+    parser.add_argument(
+        "--llm-base-url",
+        default=None,
+        help="OpenAI-compatible base URL (default: $OPENAI_BASE_URL / $LLM_BASE_URL).",
+    )
+    parser.add_argument(
+        "--llm-api-key",
+        default=None,
+        help="Override $OPENAI_API_KEY (placeholder is sent automatically for local servers).",
+    )
+    parser.add_argument(
+        "--llm-response-format",
+        choices=("json_schema", "json_object", "none"),
+        default="json_schema",
+        help="LLM output constraint mode (default: json_schema).",
     )
     parser.add_argument(
         "--llm-top-k",
@@ -111,10 +131,21 @@ def main() -> None:
 
     llm_config = None
     if args.llm:
-        llm_config = LLMConfig(top_k=args.llm_top_k)
+        llm_config = LLMConfig(
+            top_k=args.llm_top_k,
+            response_format=args.llm_response_format,
+        )
         if args.llm_model:
             llm_config.model = args.llm_model
-        print(f"[INFO] LLM mode ON (model={llm_config.model}, top_k={llm_config.top_k})")
+        if args.llm_base_url:
+            llm_config.base_url = args.llm_base_url
+        if args.llm_api_key:
+            llm_config.api_key = args.llm_api_key
+        print(
+            f"[INFO] LLM mode ON (model={llm_config.model},"
+            f" base_url={llm_config.base_url or 'default'},"
+            f" top_k={llm_config.top_k})"
+        )
 
     planner = DPOCLPlanner(
         search_strategy="best_first",

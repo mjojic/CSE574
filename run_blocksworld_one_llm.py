@@ -2,14 +2,30 @@
 """Run a single Blocksworld instance through the LLM-driven planner.
 
 Reuses the discovery/compilation helpers in ``test_blocksworld.py`` so the
-problem layout stays consistent. The planner is configured with ``use_llm=True``
-which routes both next-node selection and flaw selection to the OpenAI policy
-defined in ``pydpocl.planning.llm_policy``.
+problem layout stays consistent. The planner is configured with ``use_llm=True``,
+which delegates next-node selection, flaw selection, and (by default) one
+single-resolver expansion per step to the policy in
+``pydpocl.planning.llm_policy``. The same code path supports the official
+OpenAI API and any OpenAI-compatible server (vLLM, llama.cpp, etc.).
 
-Examples:
-    python run_blocksworld_one_llm.py --problem-type generated_basic --instance 1
+Pointing at a local vLLM endpoint serving Qwen3-32B-FP8::
+
+    export OPENAI_BASE_URL=http://localhost:8000/v1
+    python run_blocksworld_one_llm.py \\
+        --problem-type generated_basic --instance 1 \\
+        --llm-model Qwen/Qwen3-32B-FP8 \\
+        --llm-response-format json_object
+
+Or pass the URL directly::
+
+    python run_blocksworld_one_llm.py \\
+        --problem-type generated_basic --instance 1 \\
+        --llm-base-url http://localhost:8000/v1 \\
+        --llm-model Qwen/Qwen3-32B-FP8
+
+Original OpenAI usage still works unchanged (just set ``OPENAI_API_KEY``)::
+
     python run_blocksworld_one_llm.py --problem-type mystery --instance 3 --timeout 120
-    python run_blocksworld_one_llm.py --problem-type generated_basic --instance 1 --llm-model gpt-5.4-mini --llm-top-k 5
 """
 
 from __future__ import annotations
@@ -78,7 +94,54 @@ def main() -> None:
     parser.add_argument(
         "--llm-model",
         default=None,
-        help=f"OpenAI model id (default: $OPENAI_MODEL or {DEFAULT_MODEL})",
+        help=(
+            "Model identifier (default: $OPENAI_MODEL / $LLM_MODEL or"
+            f" {DEFAULT_MODEL}). For vLLM, pass the model id served by the"
+            " endpoint, e.g. 'Qwen/Qwen3-32B-FP8'."
+        ),
+    )
+    parser.add_argument(
+        "--llm-base-url",
+        default=None,
+        help=(
+            "OpenAI-compatible base URL (default: $OPENAI_BASE_URL /"
+            " $LLM_BASE_URL). For vLLM use e.g. 'http://localhost:8000/v1'."
+        ),
+    )
+    parser.add_argument(
+        "--llm-api-key",
+        default=None,
+        help=(
+            "Override $OPENAI_API_KEY. Local servers usually ignore this; a"
+            " placeholder is sent when a base URL is set without a key."
+        ),
+    )
+    parser.add_argument(
+        "--llm-response-format",
+        choices=("json_schema", "json_object", "none"),
+        default="json_schema",
+        help=(
+            "How to constrain LLM outputs (default: json_schema). Use"
+            " json_object for vLLM builds that lack strict structured-output"
+            " support; the policy auto-falls back if the server rejects"
+            " json_schema."
+        ),
+    )
+    parser.add_argument(
+        "--llm-single-resolver",
+        dest="llm_single_resolver",
+        action="store_true",
+        default=True,
+        help="Pick exactly one resolver per expansion (default).",
+    )
+    parser.add_argument(
+        "--llm-expand-all",
+        dest="llm_single_resolver",
+        action="store_false",
+        help=(
+            "Legacy mode: enqueue every consistent successor for the chosen"
+            " flaw rather than relying on LLM single-resolver selection."
+        ),
     )
     parser.add_argument(
         "--llm-top-k",
@@ -116,17 +179,30 @@ def main() -> None:
         top_k=args.llm_top_k,
         max_retries=args.llm_max_retries,
         temperature=args.llm_temperature,
+        response_format=args.llm_response_format,
+        single_resolver=args.llm_single_resolver,
     )
     if args.llm_model:
         llm_config.model = args.llm_model
+    if args.llm_base_url:
+        llm_config.base_url = args.llm_base_url
+    if args.llm_api_key:
+        llm_config.api_key = args.llm_api_key
+
+    expansion_label = (
+        "single-resolver+reprompt" if llm_config.single_resolver else "expand-all"
+    )
 
     print("Running one Blocksworld instance in LLM mode")
-    print(f"  problem    : {case.problem_path}")
-    print(f"  domain     : {case.domain_path}")
-    print(f"  heuristic  : {args.heuristic}")
-    print(f"  timeout    : {args.timeout}s")
-    print(f"  llm model  : {llm_config.model}")
-    print(f"  llm top_k  : {llm_config.top_k}")
+    print(f"  problem      : {case.problem_path}")
+    print(f"  domain       : {case.domain_path}")
+    print(f"  heuristic    : {args.heuristic}")
+    print(f"  timeout      : {args.timeout}s")
+    print(f"  llm model    : {llm_config.model}")
+    print(f"  llm base url : {llm_config.base_url or 'default'}")
+    print(f"  llm top_k    : {llm_config.top_k}")
+    print(f"  llm format   : {llm_config.response_format}")
+    print(f"  llm expansion: {expansion_label}")
 
     print("\nCompiling problem...")
     problem = compile_domain_and_problem(case.domain_path, case.problem_path)
