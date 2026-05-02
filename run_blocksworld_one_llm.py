@@ -8,9 +8,10 @@ single-resolver expansion per step to the policy in
 ``pydpocl.planning.llm_policy``. The same code path supports the official
 OpenAI API and any OpenAI-compatible server (vLLM, llama.cpp, etc.).
 
-Pointing at a local vLLM endpoint serving Qwen3-32B-FP8::
+Pointing at a local vLLM endpoint serving Qwen3-32B-FP8 (port must match
+``scripts/start_vllm_qwen3_32b_fp8.sh``, default ``PORT=8877``)::
 
-    export OPENAI_BASE_URL=http://localhost:8000/v1
+    export OPENAI_BASE_URL=http://localhost:8877/v1
     python run_blocksworld_one_llm.py \\
         --problem-type generated_basic --instance 1 \\
         --llm-model Qwen/Qwen3-32B-FP8 \\
@@ -20,7 +21,7 @@ Or pass the URL directly::
 
     python run_blocksworld_one_llm.py \\
         --problem-type generated_basic --instance 1 \\
-        --llm-base-url http://localhost:8000/v1 \\
+        --llm-base-url http://localhost:8877/v1 \\
         --llm-model Qwen/Qwen3-32B-FP8
 
 Original OpenAI usage still works unchanged (just set ``OPENAI_API_KEY``)::
@@ -105,7 +106,8 @@ def main() -> None:
         default=None,
         help=(
             "OpenAI-compatible base URL (default: $OPENAI_BASE_URL /"
-            " $LLM_BASE_URL). For vLLM use e.g. 'http://localhost:8000/v1'."
+            " $LLM_BASE_URL). For local vLLM match start_vllm_qwen3_32b_fp8.sh "
+            "(default port 8877), e.g. 'http://localhost:8877/v1'."
         ),
     )
     parser.add_argument(

@@ -13,24 +13,59 @@
 #   export TENSOR_PARALLEL_SIZE=2
 #   ./scripts/start_vllm_qwen3_32b_fp8.sh
 #
+# Port: vLLM defaults to 8000 (often taken on shared machines). This script defaults to 8877.
+# Override: PORT=9100 ./scripts/start_vllm_qwen3_32b_fp8.sh
+# Or scan upward until free: AUTO_PORT=1 PORT=8877 ./scripts/start_vllm_qwen3_32b_fp8.sh
+#
 # Optional:
 #   export MAX_MODEL_LEN=8192         # lower context if you hit OOM
 #   export HF_TOKEN=hf_...            # if Hub auth is required
 #   ./scripts/start_vllm_qwen3_32b_fp8.sh --kv-cache-dtype fp8   # extra vLLM flags at end
 #
-# Once the server is up, point the planner at it:
-#   export OPENAI_BASE_URL=http://localhost:8000/v1
+# Once the server is up, point the planner at it (match PORT below):
+#   export OPENAI_BASE_URL=http://localhost:8877/v1
 #   python run_blocksworld_one_llm.py --problem-type generated_basic --instance 1 \
 #       --llm-model Qwen/Qwen3-32B-FP8 --llm-response-format json_object
 
 set -euo pipefail
 
-export HF_HOME="${HF_HOME:-/scratch/mjojic/huggingface}"
+export CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-1}"
+export HF_HOME="${HF_HOME:-/mnt/data/shared_hf_home}"
 
 MODEL_ID="${MODEL_ID:-Qwen/Qwen3-32B-FP8}"
 HOST="${HOST:-0.0.0.0}"
-PORT="${PORT:-8000}"
-TENSOR_PARALLEL_SIZE="${TENSOR_PARALLEL_SIZE:-2}"
+PORT="${PORT:-8877}"
+TENSOR_PARALLEL_SIZE="${TENSOR_PARALLEL_SIZE:-1}"
+
+if [[ "${AUTO_PORT:-0}" == "1" ]]; then
+  BASE_PORT="$PORT"
+  PORT="$(
+    HOST_BIND="${HOST:-0.0.0.0}"
+    export HOST_BIND BASE_PORT
+    python3 - <<'PY'
+import os, socket
+host = os.environ["HOST_BIND"]
+start = int(os.environ["BASE_PORT"])
+family = socket.AF_INET6 if ":" in host.strip("[]") else socket.AF_INET
+bind_host = host if host not in ("", "0.0.0.0", "::") else "0.0.0.0"
+for p in range(start, start + 256):
+    s = socket.socket(family, socket.SOCK_STREAM)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    try:
+        s.bind((bind_host, p))
+        print(p)
+        break
+    except OSError:
+        pass
+    finally:
+        s.close()
+else:
+    raise SystemExit("AUTO_PORT: no free TCP port in range")
+PY
+  )"
+fi
+
+echo "vLLM will listen on http://${HOST}:${PORT}/v1 (set PORT or AUTO_PORT=1 to change)" >&2
 
 EXTRA_ARGS=()
 if [[ -n "${MAX_MODEL_LEN:-}" ]]; then

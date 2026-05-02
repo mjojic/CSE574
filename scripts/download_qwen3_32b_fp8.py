@@ -20,7 +20,7 @@ import os
 import sys
 
 REPO_ID = "Qwen/Qwen3-32B-FP8"
-HUB_CACHE_DIR = "/scratch/mjojic/huggingface/hub"
+HUB_CACHE_DIR = "/mnt/data/shared_hf_home/hub"
 
 
 def main() -> None:
